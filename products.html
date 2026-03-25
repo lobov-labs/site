@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Products — Lobov Labs</title>
+  <meta name="description" content="Browser extensions and developer tools by Lobov Labs." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:       #0d0d0d;
+      --surface:  #141414;
+      --surface2: #191919;
+      --border:   #222;
+      --muted:    #444;
+      --text:     #c8c8c8;
+      --bright:   #f0f0f0;
+      --accent:   #e8a030;
+      --accent2:  #c06820;
+      --mono:     'IBM Plex Mono', monospace;
+      --sans:     'IBM Plex Sans', sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 16px;
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.6;
+    }
+
+    /* ─── Nav ─── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2.5rem;
+      height: 56px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(13,13,13,0.85);
+      backdrop-filter: blur(12px);
+    }
+
+    .nav-logo {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--bright);
+      text-decoration: none;
+      letter-spacing: 0.08em;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .nav-logo .cursor {
+      display: inline-block;
+      width: 8px;
+      height: 14px;
+      background: var(--accent);
+      animation: blink 1.1s step-end infinite;
+      vertical-align: middle;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-decoration: none;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover,
+    .nav-links a.active { color: var(--accent); }
+
+    /* ─── Page header ─── */
+    .page-header {
+      position: relative;
+      z-index: 1;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 9rem 2.5rem 3rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .page-header .breadcrumb {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      margin-bottom: 1.25rem;
+    }
+
+    .page-header .breadcrumb a {
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .page-header .breadcrumb a:hover { color: var(--text); }
+    .page-header .breadcrumb span { color: var(--accent); }
+
+    .page-header h1 {
+      font-family: var(--mono);
+      font-size: clamp(1.6rem, 4vw, 2.6rem);
+      font-weight: 600;
+      color: var(--bright);
+      letter-spacing: -0.02em;
+    }
+
+    .page-header p {
+      margin-top: 0.75rem;
+      font-size: 0.95rem;
+      color: var(--muted);
+    }
+
+    /* ─── Products list ─── */
+    .products {
+      position: relative;
+      z-index: 1;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 3rem 2.5rem 6rem;
+    }
+
+    /* ─── Product card ─── */
+    .product-card {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      margin-bottom: 1.5rem;
+      transition: border-color 0.25s, background 0.25s;
+      animation: fadeUp 0.5s ease both;
+    }
+
+    .product-card:hover {
+      border-color: #333;
+      background: var(--surface2);
+    }
+
+    .product-inner {
+      padding: 2rem 2.5rem;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 1.5rem 2rem;
+      align-items: start;
+    }
+
+    /* Icon */
+    .product-icon {
+      width: 52px;
+      height: 52px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-family: var(--mono);
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    /* Content */
+    .product-content {}
+
+    .product-meta {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .product-name {
+      font-family: var(--mono);
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--bright);
+    }
+
+    .badge {
+      font-family: var(--mono);
+      font-size: 0.62rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.2rem 0.55rem;
+      border: 1px solid;
+    }
+
+    .badge-live {
+      color: #5dba6e;
+      border-color: #2a4a30;
+      background: #0d1f11;
+    }
+
+    .badge-wip {
+      color: var(--accent);
+      border-color: #4a3010;
+      background: #1f1508;
+    }
+
+    .badge-chrome {
+      color: #7aabdf;
+      border-color: #1a3050;
+      background: #0a1520;
+    }
+
+    .product-desc {
+      font-size: 0.92rem;
+      color: var(--text);
+      line-height: 1.75;
+      margin-bottom: 1rem;
+    }
+
+    .product-features {
+      list-style: none;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 1.25rem;
+    }
+
+    .product-features li {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+    }
+
+    .product-features li::before {
+      content: '→ ';
+      color: var(--accent);
+      opacity: 0.6;
+    }
+
+    /* CTA column */
+    .product-cta {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.75rem;
+      flex-shrink: 0;
+    }
+
+    .btn-install {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--bg);
+      background: var(--accent);
+      border: none;
+      padding: 0.65rem 1.25rem;
+      cursor: pointer;
+      text-decoration: none;
+      white-space: nowrap;
+      transition: background 0.2s, transform 0.15s;
+      display: inline-block;
+    }
+
+    .btn-install:hover {
+      background: var(--accent2);
+      transform: translateY(-1px);
+    }
+
+    .btn-source {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--muted);
+      text-decoration: none;
+      letter-spacing: 0.04em;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1px;
+      transition: color 0.2s, border-color 0.2s;
+    }
+
+    .btn-source:hover { color: var(--text); border-color: var(--muted); }
+
+    /* Divider */
+    .product-divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 0 2.5rem;
+    }
+
+    /* ─── Empty / coming soon ─── */
+    .coming-soon {
+      border: 1px dashed var(--border);
+      padding: 2rem 2.5rem;
+      text-align: center;
+      margin-top: 1.5rem;
+    }
+
+    .coming-soon p {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      color: var(--muted);
+      letter-spacing: 0.06em;
+    }
+
+    /* ─── Footer ─── */
+    footer {
+      position: relative;
+      z-index: 1;
+      border-top: 1px solid var(--border);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem 2.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .footer-logo {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 1.5rem;
+      list-style: none;
+    }
+
+    .footer-links a {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-decoration: none;
+      letter-spacing: 0.06em;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover { color: var(--text); }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .product-card:nth-child(1) { animation-delay: 0.05s; }
+    .product-card:nth-child(2) { animation-delay: 0.15s; }
+    .product-card:nth-child(3) { animation-delay: 0.25s; }
+
+    @media (max-width: 680px) {
+      nav { padding: 0 1.25rem; }
+      .page-header, .products { padding-left: 1.25rem; padding-right: 1.25rem; }
+      .product-inner { grid-template-columns: auto 1fr; }
+      .product-cta { flex-direction: row; align-items: center; grid-column: 1 / -1; }
+      .product-divider { margin: 0 1.25rem; }
+      footer { padding: 1.5rem 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="/" class="nav-logo">
+      LL<span class="cursor"></span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="/products.html" class="active">Products</a></li>
+      <li><a href="/privacy.html">Privacy</a></li>
+      <li><a href="mailto:lobovlabs@proton.me">Contact</a></li>
+    </ul>
+  </nav>
+
+  <header class="page-header">
+    <p class="breadcrumb">
+      <a href="/">lobovlabs.com</a>
+      <span> / products</span>
+    </p>
+    <h1>Products</h1>
+    <p>Everything shipped under the Lobov Labs banner.</p>
+  </header>
+
+  <main class="products">
+
+    <!-- ── YouTrack to Sheets ── -->
+    <div class="product-card">
+      <div class="product-inner">
+        <div class="product-icon">YT</div>
+
+        <div class="product-content">
+          <div class="product-meta">
+            <span class="product-name">YouTrack → Google Sheets</span>
+            <span class="badge badge-live">Live</span>
+            <span class="badge badge-chrome">Chrome Extension</span>
+          </div>
+          <p class="product-desc">
+            Export YouTrack issues directly to Google Sheets with one click. Captures issue ID, title, status, priority, author, assignee, creation and update dates — no API tokens, no setup scripts.
+          </p>
+          <ul class="product-features">
+            <li>One-click export</li>
+            <li>Google OAuth 2.0</li>
+            <li>Any YouTrack instance</li>
+            <li>Custom project keys</li>
+            <li>EN / RU interface</li>
+          </ul>
+        </div>
+
+        <div class="product-cta">
+          <a
+            href="https://chromewebstore.google.com/detail/hmmieajlpegpelfiephalokbbfbjomkc"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="btn-install"
+          >Install →</a>
+          <a href="/privacy.html" class="btn-source">Privacy policy</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Coming soon placeholder ── -->
+    <div class="coming-soon">
+      <p>// more tools in the works — check back later</p>
+    </div>
+
+  </main>
+
+  <footer>
+    <span class="footer-logo">LOBOV LABS © 2025</span>
+    <ul class="footer-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="/privacy.html">Privacy Policy</a></li>
+      <li><a href="mailto:lobovlabs@proton.me">lobovlabs@proton.me</a></li>
+    </ul>
+  </footer>
+
+</body>
+</html>
