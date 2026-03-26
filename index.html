@@ -23,7 +23,7 @@
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    html { scroll-behavior: smooth; }
+    html { scroll-behavior: smooth; overflow-x: hidden; }
 
     body {
       background: var(--bg);
@@ -344,6 +344,7 @@
     @media (max-width: 640px) {
       nav { padding: 0 1.25rem; }
       .hero { padding: 0 1.25rem; }
+      .hero-grid { display: none; }
       .stats { flex-direction: column; }
       .stat { border-right: none; border-bottom: 1px solid var(--border); padding: 1.5rem 1.25rem; }
       .about { grid-template-columns: 1fr; gap: 1.5rem; padding: 4rem 1.25rem; }
