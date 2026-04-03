@@ -284,7 +284,7 @@
     <a href="/" class="nav-logo">LL<span class="cursor"></span></a>
     <ul class="nav-links">
       <li><a href="/products.html">Products</a></li>
-      <li><a href="mailto:lobovlabs@proton.me">Contact</a></li>
+      <li><a href="/cdn-cgi/l/email-protection#45292a272a33292427360535372a312a2b6b2820">Contact</a></li>
     </ul>
   </nav>
 
@@ -296,7 +296,7 @@
       <span> / youtrack-to-sheets / privacy</span>
     </p>
     <h1>Privacy Policy</h1>
-    <p class="meta">YouTrack → Google Sheets &nbsp;·&nbsp; Last updated: June 2025</p>
+    <p class="meta">YouTrack → Google Sheets &nbsp;·&nbsp; Last updated: April 2026</p>
   </header>
 
   <main class="content">
@@ -304,7 +304,7 @@
     <div class="section">
       <h2>Overview</h2>
       <div class="highlight-box">
-        <p><strong>Short version:</strong> This extension does not collect, store, or transmit any personal data to external servers. All processing happens locally in your browser.</p>
+        <p><strong>Short version:</strong> This extension does not collect, store, or transmit any personal data to external servers. All processing happens locally in your browser. Access to Google Drive is limited exclusively to the single file you choose.</p>
       </div>
     </div>
 
@@ -334,12 +334,41 @@
     </div>
 
     <div class="section">
+      <h2>Data sharing</h2>
+      <p>We do not sell, trade, share, transfer, or disclose Google user data to any third parties.</p>
+      <p>The extension transmits data only to:</p>
+      <ul>
+        <li><strong style="color: var(--bright);">Google Sheets API</strong> — to write YouTrack issue data into the spreadsheet you selected. This transmission is governed by <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google's Privacy Policy</a>.</li>
+        <li><strong style="color: var(--bright);">Your YouTrack instance</strong> — to read issue data from the page currently open in your browser.</li>
+      </ul>
+      <p>No Google user data is sent to Lobov Labs servers or any other external services.</p>
+    </div>
+
+    <div class="section">
+      <h2>Data protection</h2>
+      <p>All communication between the extension and Google APIs is conducted exclusively over HTTPS/TLS.</p>
+      <p>Authentication is handled via Google OAuth 2.0. The extension does not store your Google account credentials. The OAuth token is stored locally in Chrome's secure storage (<code style="font-family: var(--mono); font-size: 0.82rem; color: var(--accent);">chrome.storage.local</code>) and is never transmitted to Lobov Labs servers.</p>
+      <p>Access is limited to the minimum necessary scope (<code style="font-family: var(--mono); font-size: 0.82rem; color: var(--accent);">drive.file</code>), which restricts the extension to only the specific file the user explicitly selects.</p>
+    </div>
+
+    <div class="section">
+      <h2>Data retention and deletion</h2>
+      <p>Lobov Labs does not store any Google user data on its servers — there is nothing to retain or delete on our end.</p>
+      <p>Data stored locally in your browser:</p>
+      <ul>
+        <li><strong style="color: var(--bright);">OAuth token</strong> — stored by Chrome and automatically managed by the browser. You can revoke access at any time at <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener">myaccount.google.com/permissions</a>.</li>
+        <li><strong style="color: var(--bright);">Last-used Spreadsheet ID</strong> — stored locally for convenience. You can clear it by uninstalling the extension or clearing Chrome extension storage.</li>
+      </ul>
+      <p>To fully remove all locally stored data, uninstall the extension from Chrome.</p>
+    </div>
+
+    <div class="section">
       <h2>Google API scopes</h2>
       <p>The extension requests the following OAuth scope:</p>
       <ul>
-        <li><code style="font-family: var(--mono); font-size: 0.82rem; color: var(--accent);">https://www.googleapis.com/auth/spreadsheets</code> — to create and write to Google Sheets</li>
+        <li><code style="font-family: var(--mono); font-size: 0.82rem; color: var(--accent);">https://www.googleapis.com/auth/drive.file</code> — to create and write to files created by or explicitly selected by the user in Google Drive</li>
       </ul>
-      <p>This scope is used exclusively to write exported YouTrack data into the spreadsheet you specify. The extension does not read, modify, or access any other files in your Google Drive.</p>
+      <p>This scope grants access only to the specific Google Spreadsheet the user selects. The extension cannot access any other files in your Google Drive.</p>
     </div>
 
     <div class="section">
@@ -365,20 +394,12 @@
 
     <div class="section">
       <h2>Contact</h2>
-      <p>Questions or concerns about this privacy policy? Reach out at <a href="mailto:lobovlabs@proton.me">lobovlabs@proton.me</a></p>
+      <p>Questions or concerns about this privacy policy? Reach out at <a href="/cdn-cgi/l/email-protection#c4a8aba6abb2a8a5a6b784b4b6abb0abaaeaa9a1"><span class="__cf_email__" data-cfemail="87ebe8e5e8f1ebe6e5f4c7f7f5e8f3e8e9a9eae2">[email&#160;protected]</span></a></p>
     </div>
 
   </main>
 
   <footer>
-    <span class="footer-logo">LOBOV LABS © 2025</span>
+    <span class="footer-logo">LOBOV LABS © 2026</span>
     <ul class="footer-links">
-      <li><a href="/">Home</a></li>
-      <li><a href="/products.html">Products</a></li>
-      <li><a href="mailto:lobovlabs@proton.me">lobovlabs@proton.me</a></li>
-    </ul>
-  </footer>
-
-</body>
-</html>
-
+      <li><a href="/">Home</
