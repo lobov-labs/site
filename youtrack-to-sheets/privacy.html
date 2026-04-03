@@ -229,9 +229,7 @@
       margin: 0;
     }
 
-    .highlight-box strong {
-      color: var(--accent);
-    }
+    .highlight-box strong { color: var(--accent); }
 
     footer {
       position: relative;
@@ -284,7 +282,7 @@
     <a href="/" class="nav-logo">LL<span class="cursor"></span></a>
     <ul class="nav-links">
       <li><a href="/products.html">Products</a></li>
-      <li><a href="/cdn-cgi/l/email-protection#45292a272a33292427360535372a312a2b6b2820">Contact</a></li>
+      <li><a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#108;&#111;&#98;&#111;&#118;&#108;&#97;&#98;&#115;&#64;&#112;&#114;&#111;&#116;&#111;&#110;&#46;&#109;&#101;">Contact</a></li>
     </ul>
   </nav>
 
@@ -296,7 +294,7 @@
       <span> / youtrack-to-sheets / privacy</span>
     </p>
     <h1>Privacy Policy</h1>
-    <p class="meta">YouTrack → Google Sheets &nbsp;·&nbsp; Last updated: April 2026</p>
+    <p class="meta">YouTrack &#8594; Google Sheets &nbsp;&middot;&nbsp; Last updated: April 2026</p>
   </header>
 
   <main class="content">
@@ -310,7 +308,7 @@
 
     <div class="section">
       <h2>What the extension does</h2>
-      <p>YouTrack → Google Sheets is a Chrome extension that reads issue data from your YouTrack instance and writes it to a Google Spreadsheet of your choice via the Google Sheets API.</p>
+      <p>YouTrack &#8594; Google Sheets is a Chrome extension that reads issue data from your YouTrack instance and writes it to a Google Spreadsheet of your choice via the Google Sheets API.</p>
     </div>
 
     <div class="section">
@@ -318,8 +316,8 @@
       <p>The extension accesses the following data solely to perform the export function:</p>
       <ul>
         <li>Issue fields visible on the current YouTrack page (ID, title, status, priority, author, assignee, dates)</li>
-        <li>Your Google account identity — only to authorise writes to Google Sheets on your behalf</li>
-        <li>The Google Spreadsheet you select as the export destination</li>
+        <li>Your Google account identity &#8212; only to authorise writes to Google Sheets on your behalf</li>
+        <li>The Google Spreadsheet you explicitly select as the export destination</li>
       </ul>
     </div>
 
@@ -327,8 +325,8 @@
       <h2>Data storage</h2>
       <p>The extension stores only the following items locally in Chrome storage:</p>
       <ul>
-        <li>Your OAuth 2.0 token — used to authenticate with the Google Sheets API. Stored locally by Chrome, never sent to Lobov Labs servers.</li>
-        <li>The Spreadsheet ID you last used — for convenience, so you don't have to re-enter it each time.</li>
+        <li>Your OAuth 2.0 token &#8212; used to authenticate with the Google Sheets API. Stored locally by Chrome, never sent to Lobov Labs servers.</li>
+        <li>The Spreadsheet ID you last used &#8212; for convenience, so you don&#8217;t have to re-enter it each time.</li>
       </ul>
       <p>No data is sent to any server operated by Lobov Labs.</p>
     </div>
@@ -338,8 +336,8 @@
       <p>We do not sell, trade, share, transfer, or disclose Google user data to any third parties.</p>
       <p>The extension transmits data only to:</p>
       <ul>
-        <li><strong style="color: var(--bright);">Google Sheets API</strong> — to write YouTrack issue data into the spreadsheet you selected. This transmission is governed by <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google's Privacy Policy</a>.</li>
-        <li><strong style="color: var(--bright);">Your YouTrack instance</strong> — to read issue data from the page currently open in your browser.</li>
+        <li><strong style="color: var(--bright);">Google Sheets API</strong> &#8212; to write YouTrack issue data into the spreadsheet you selected. This transmission is governed by <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google&#8217;s Privacy Policy</a>.</li>
+        <li><strong style="color: var(--bright);">Your YouTrack instance</strong> &#8212; to read issue data from the page currently open in your browser.</li>
       </ul>
       <p>No Google user data is sent to Lobov Labs servers or any other external services.</p>
     </div>
@@ -347,17 +345,17 @@
     <div class="section">
       <h2>Data protection</h2>
       <p>All communication between the extension and Google APIs is conducted exclusively over HTTPS/TLS.</p>
-      <p>Authentication is handled via Google OAuth 2.0. The extension does not store your Google account credentials. The OAuth token is stored locally in Chrome's secure storage (<code style="font-family: var(--mono); font-size: 0.82rem; color: var(--accent);">chrome.storage.local</code>) and is never transmitted to Lobov Labs servers.</p>
+      <p>Authentication is handled via Google OAuth 2.0. The extension does not store your Google account credentials. The OAuth token is stored locally in Chrome&#8217;s secure storage (<code style="font-family: var(--mono); font-size: 0.82rem; color: var(--accent);">chrome.storage.local</code>) and is never transmitted to Lobov Labs servers.</p>
       <p>Access is limited to the minimum necessary scope (<code style="font-family: var(--mono); font-size: 0.82rem; color: var(--accent);">drive.file</code>), which restricts the extension to only the specific file the user explicitly selects.</p>
     </div>
 
     <div class="section">
       <h2>Data retention and deletion</h2>
-      <p>Lobov Labs does not store any Google user data on its servers — there is nothing to retain or delete on our end.</p>
+      <p>Lobov Labs does not store any Google user data on its servers &#8212; there is nothing to retain or delete on our end.</p>
       <p>Data stored locally in your browser:</p>
       <ul>
-        <li><strong style="color: var(--bright);">OAuth token</strong> — stored by Chrome and automatically managed by the browser. You can revoke access at any time at <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener">myaccount.google.com/permissions</a>.</li>
-        <li><strong style="color: var(--bright);">Last-used Spreadsheet ID</strong> — stored locally for convenience. You can clear it by uninstalling the extension or clearing Chrome extension storage.</li>
+        <li><strong style="color: var(--bright);">OAuth token</strong> &#8212; stored by Chrome and automatically managed by the browser. You can revoke access at any time at <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener">myaccount.google.com/permissions</a>.</li>
+        <li><strong style="color: var(--bright);">Last-used Spreadsheet ID</strong> &#8212; stored locally for convenience. You can clear it by uninstalling the extension or clearing Chrome extension storage.</li>
       </ul>
       <p>To fully remove all locally stored data, uninstall the extension from Chrome.</p>
     </div>
@@ -366,7 +364,7 @@
       <h2>Google API scopes</h2>
       <p>The extension requests the following OAuth scope:</p>
       <ul>
-        <li><code style="font-family: var(--mono); font-size: 0.82rem; color: var(--accent);">https://www.googleapis.com/auth/drive.file</code> — to create and write to files created by or explicitly selected by the user in Google Drive</li>
+        <li><code style="font-family: var(--mono); font-size: 0.82rem; color: var(--accent);">https://www.googleapis.com/auth/drive.file</code> &#8212; to create and write to files created by or explicitly selected by the user in Google Drive</li>
       </ul>
       <p>This scope grants access only to the specific Google Spreadsheet the user selects. The extension cannot access any other files in your Google Drive.</p>
     </div>
@@ -375,8 +373,8 @@
       <h2>Third parties</h2>
       <p>The extension interacts only with:</p>
       <ul>
-        <li><strong style="color: var(--bright);">Google Sheets API</strong> — to write exported data on your behalf</li>
-        <li><strong style="color: var(--bright);">Your YouTrack instance</strong> — to read issue data from the page you have open</li>
+        <li><strong style="color: var(--bright);">Google Sheets API</strong> &#8212; to write exported data on your behalf</li>
+        <li><strong style="color: var(--bright);">Your YouTrack instance</strong> &#8212; to read issue data from the page you have open</li>
       </ul>
       <p>No analytics, tracking scripts, or advertising SDKs are included.</p>
     </div>
@@ -385,21 +383,28 @@
       <h2>Permissions</h2>
       <p>The extension requests the following Chrome permissions:</p>
       <ul>
-        <li><strong style="color: var(--bright);">activeTab</strong> — to read YouTrack issue data from the current tab</li>
-        <li><strong style="color: var(--bright);">storage</strong> — to save your OAuth token and last-used spreadsheet ID locally</li>
-        <li><strong style="color: var(--bright);">identity</strong> — to authenticate with Google OAuth 2.0</li>
-        <li><strong style="color: var(--bright);">Host permission for your YouTrack domain</strong> — to scrape issue fields from the page</li>
+        <li><strong style="color: var(--bright);">activeTab</strong> &#8212; to read YouTrack issue data from the current tab</li>
+        <li><strong style="color: var(--bright);">storage</strong> &#8212; to save your OAuth token and last-used spreadsheet ID locally</li>
+        <li><strong style="color: var(--bright);">identity</strong> &#8212; to authenticate with Google OAuth 2.0</li>
+        <li><strong style="color: var(--bright);">Host permission for your YouTrack domain</strong> &#8212; to read issue fields from the page</li>
       </ul>
     </div>
 
     <div class="section">
       <h2>Contact</h2>
-      <p>Questions or concerns about this privacy policy? Reach out at <a href="/cdn-cgi/l/email-protection#c4a8aba6abb2a8a5a6b784b4b6abb0abaaeaa9a1"><span class="__cf_email__" data-cfemail="87ebe8e5e8f1ebe6e5f4c7f7f5e8f3e8e9a9eae2">[email&#160;protected]</span></a></p>
+      <p>Questions or concerns about this privacy policy? Reach out at <a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#108;&#111;&#98;&#111;&#118;&#108;&#97;&#98;&#115;&#64;&#112;&#114;&#111;&#116;&#111;&#110;&#46;&#109;&#101;">&#108;&#111;&#98;&#111;&#118;&#108;&#97;&#98;&#115;&#64;&#112;&#114;&#111;&#116;&#111;&#110;&#46;&#109;&#101;</a></p>
     </div>
 
   </main>
 
   <footer>
-    <span class="footer-logo">LOBOV LABS © 2026</span>
+    <span class="footer-logo">LOBOV LABS &#169; 2026</span>
     <ul class="footer-links">
-      <li><a href="/">Home</
+      <li><a href="/">Home</a></li>
+      <li><a href="/products.html">Products</a></li>
+      <li><a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#108;&#111;&#98;&#111;&#118;&#108;&#97;&#98;&#115;&#64;&#112;&#114;&#111;&#116;&#111;&#110;&#46;&#109;&#101;">&#108;&#111;&#98;&#111;&#118;&#108;&#97;&#98;&#115;&#64;&#112;&#114;&#111;&#116;&#111;&#110;&#46;&#109;&#101;</a></li>
+    </ul>
+  </footer>
+
+</body>
+</html>
