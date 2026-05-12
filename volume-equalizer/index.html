@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Volume Equalizer - Auto-normalize Loudness in Chrome</title>
+  <meta name="description" content="Volume Equalizer for Chrome automatically normalizes audio loudness on any website. No more loud ads, jarring volume jumps, or reaching for the volume knob." />
+  <link rel="canonical" href="https://lobovlabs.com/volume-equalizer/" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://lobovlabs.com/volume-equalizer/" />
+  <meta property="og:title" content="Volume Equalizer - Auto-normalize Loudness in Chrome" />
+  <meta property="og:description" content="Automatically keeps every video and audio at a consistent level. No more loud ads or jarring volume jumps between tabs." />
+  <meta property="og:site_name" content="Lobov Labs" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Volume Equalizer",
+    "applicationCategory": "BrowserApplication",
+    "operatingSystem": "Chrome",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "url": "https://chromewebstore.google.com/detail/volume-equalizer/ibolchncmlkfefbmpimdfcpkdambafoi",
+    "description": "Auto-normalize volume across videos and websites. Loudness leveler and equalizer, no more jarring jumps between scenes, ads, or tabs.",
+    "publisher": {
+      "@type": "Organization",
+      "name": "Lobov Labs",
+      "url": "https://lobovlabs.com"
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "5",
+      "ratingCount": "1"
+    }
+  }
+  </script>
+
+  <style>
+    :root {
+      --bg:       #0d0d0d;
+      --surface:  #141414;
+      --surface2: #191919;
+      --border:   #222;
+      --muted:    #777;
+      --text:     #c8c8c8;
+      --bright:   #f0f0f0;
+      --accent:   #e8a030;
+      --accent2:  #c06820;
+      --mono:     'IBM Plex Mono', monospace;
+      --sans:     'IBM Plex Sans', sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 16px;
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.6;
+    }
+
+    /* Nav */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2.5rem;
+      height: 56px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(13,13,13,0.85);
+      backdrop-filter: blur(12px);
+    }
+
+    .nav-logo {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--bright);
+      text-decoration: none;
+      letter-spacing: 0.08em;
+      display: flex;
+      align-items: center;
+    }
+
+    .nav-logo .cursor {
+      display: inline-block;
+      width: 8px;
+      height: 14px;
+      background: var(--accent);
+      animation: blink 1.1s step-end infinite;
+      vertical-align: middle;
+      margin-left: 2px;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-decoration: none;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--accent); }
+
+    /* Layout */
+    .wrap {
+      position: relative;
+      z-index: 1;
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 0 2.5rem;
+    }
+
+    /* Hero */
+    .hero {
+      padding: 9rem 0 5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .hero-badge {
+      display: inline-block;
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #5dba6e;
+      border: 1px solid #2a4a30;
+      background: #0d1f11;
+      padding: 0.2rem 0.6rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero h1 {
+      font-family: var(--mono);
+      font-size: clamp(1.8rem, 5vw, 3.2rem);
+      font-weight: 600;
+      color: var(--bright);
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      margin-bottom: 1.25rem;
+    }
+
+    .hero h1 span { color: var(--accent); }
+
+    .hero-sub {
+      font-size: 1.05rem;
+      color: var(--text);
+      max-width: 560px;
+      line-height: 1.8;
+      margin-bottom: 2rem;
+      font-weight: 300;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 3rem;
+    }
+
+    .btn-install {
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--bg);
+      background: var(--accent);
+      border: none;
+      padding: 0.85rem 2rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.2s, transform 0.15s;
+      display: inline-block;
+    }
+
+    .btn-install:hover {
+      background: var(--accent2);
+      transform: translateY(-1px);
+    }
+
+    .btn-ghost {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text);
+      background: transparent;
+      border: 1px solid #555;
+      padding: 0.85rem 1.75rem;
+      text-decoration: none;
+      transition: border-color 0.2s, color 0.2s;
+      display: inline-block;
+    }
+
+    .btn-ghost:hover { border-color: var(--text); color: var(--bright); }
+
+    .hero-meta {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--muted);
+      letter-spacing: 0.06em;
+    }
+
+    /* Screenshot */
+    .screenshot-wrap {
+      padding: 4rem 0;
+      border-bottom: 1px solid var(--border);
+      text-align: center;
+    }
+
+    .screenshot-wrap img {
+      max-width: 340px;
+      width: 100%;
+      border: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    .screenshot-caption {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin-top: 1rem;
+      letter-spacing: 0.06em;
+    }
+
+    /* Section */
+    .section {
+      padding: 4rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section:last-of-type { border-bottom: none; }
+
+    .section-label {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      font-weight: 500;
+      color: var(--accent);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+    }
+
+    .section-label::before { content: '// '; opacity: 0.5; }
+
+    .section h2 {
+      font-family: var(--mono);
+      font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+      font-weight: 600;
+      color: var(--bright);
+      letter-spacing: -0.01em;
+      margin-bottom: 1.25rem;
+    }
+
+    .section p {
+      font-size: 0.97rem;
+      line-height: 1.85;
+      color: var(--text);
+      margin-bottom: 1rem;
+      max-width: 680px;
+    }
+
+    .section p:last-child { margin-bottom: 0; }
+
+    .section a {
+      color: var(--accent);
+      text-decoration: none;
+      border-bottom: 1px solid var(--accent2);
+      transition: border-color 0.2s;
+    }
+
+    .section a:hover { border-color: var(--accent); }
+
+    /* Features grid */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      margin-top: 2rem;
+    }
+
+    .feature {
+      background: var(--bg);
+      padding: 1.75rem 1.75rem;
+      transition: background 0.2s;
+    }
+
+    .feature:hover { background: var(--surface); }
+
+    .feature-title {
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--bright);
+      letter-spacing: 0.04em;
+      margin-bottom: 0.5rem;
+    }
+
+    .feature-title::before {
+      content: '+ ';
+      color: var(--accent);
+      opacity: 0.7;
+    }
+
+    .feature p {
+      font-size: 0.88rem;
+      color: var(--muted);
+      line-height: 1.7;
+      margin: 0;
+      max-width: none;
+    }
+
+    /* How it works chain */
+    .audio-chain {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: var(--muted);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      line-height: 2;
+      overflow-x: auto;
+    }
+
+    .audio-chain .node {
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    .audio-chain .arrow {
+      color: #444;
+    }
+
+    .tech-detail {
+      background: var(--surface);
+      border-left: 2px solid var(--accent);
+      padding: 1rem 1.25rem;
+      margin: 1rem 0;
+      font-size: 0.9rem;
+      line-height: 1.8;
+    }
+
+    .tech-detail strong {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      color: var(--bright);
+    }
+
+    code {
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      color: var(--accent);
+      background: var(--surface);
+      padding: 0.1em 0.35em;
+    }
+
+    /* Where it works */
+    .sites-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .site-tag {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 0.3rem 0.7rem;
+      letter-spacing: 0.04em;
+    }
+
+    /* FAQ */
+    .faq-item {
+      border-top: 1px solid var(--border);
+      padding: 1.5rem 0;
+    }
+
+    .faq-item:last-child { border-bottom: 1px solid var(--border); }
+
+    .faq-q {
+      font-family: var(--mono);
+      font-size: 0.88rem;
+      font-weight: 500;
+      color: var(--bright);
+      margin-bottom: 0.75rem;
+      letter-spacing: 0.02em;
+    }
+
+    .faq-a {
+      font-size: 0.95rem;
+      color: var(--text);
+      line-height: 1.8;
+    }
+
+    /* Privacy strip */
+    .privacy-strip {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .privacy-icon {
+      font-family: var(--mono);
+      font-size: 1.2rem;
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .privacy-strip p {
+      font-size: 0.88rem;
+      color: var(--muted);
+      margin: 0;
+      max-width: none;
+    }
+
+    /* Bottom CTA */
+    .cta-bottom {
+      padding: 5rem 0;
+      text-align: center;
+    }
+
+    .cta-bottom h2 {
+      font-family: var(--mono);
+      font-size: clamp(1.2rem, 3vw, 1.8rem);
+      font-weight: 600;
+      color: var(--bright);
+      margin-bottom: 1rem;
+      letter-spacing: -0.01em;
+    }
+
+    .cta-bottom p {
+      font-size: 0.95rem;
+      color: var(--muted);
+      margin-bottom: 2rem;
+      max-width: none;
+    }
+
+    .blog-link {
+      display: block;
+      margin-top: 1.5rem;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-decoration: none;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid #333;
+      display: inline-block;
+      padding-bottom: 1px;
+      transition: color 0.2s, border-color 0.2s;
+    }
+
+    .blog-link:hover { color: var(--text); border-color: #555; }
+
+    /* Footer */
+    footer {
+      position: relative;
+      z-index: 1;
+      border-top: 1px solid var(--border);
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 2rem 2.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .footer-logo {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 1.5rem;
+      list-style: none;
+    }
+
+    .footer-links a {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-decoration: none;
+      letter-spacing: 0.06em;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover { color: var(--text); }
+
+    @media (max-width: 640px) {
+      nav { padding: 0 1.25rem; }
+      .wrap { padding: 0 1.25rem; }
+      .features-grid { grid-template-columns: 1fr; }
+      footer { padding: 1.5rem 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="/" class="nav-logo">LL<span class="cursor"></span></a>
+    <ul class="nav-links">
+      <li><a href="/products.html">Products</a></li>
+      <li><a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#108;&#111;&#98;&#111;&#118;&#108;&#97;&#98;&#115;&#64;&#112;&#114;&#111;&#116;&#111;&#110;&#46;&#109;&#101;">Contact</a></li>
+    </ul>
+  </nav>
+
+  <!-- Hero -->
+  <div class="wrap">
+    <section class="hero">
+      <div class="hero-badge">Live on Chrome Web Store</div>
+      <h1>Volume <span>Equalizer</span><br />Auto-normalize loudness in Chrome</h1>
+      <p class="hero-sub">Keeps every video and audio at the same comfortable level. No more reaching for the volume knob when ads, trailers, or other tabs suddenly get loud.</p>
+      <div class="hero-actions">
+        <a
+          href="https://chromewebstore.google.com/detail/volume-equalizer/ibolchncmlkfefbmpimdfcpkdambafoi"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="btn-install"
+        >Install for free -&gt;</a>
+        <a href="#how-it-works" class="btn-ghost">How it works</a>
+      </div>
+      <p class="hero-meta">Free. No account. No data collection. Works on any website.</p>
+    </section>
+
+    <!-- Screenshot -->
+    <div class="screenshot-wrap">
+      <img
+        src="/volume-equalizer/popup-screenshot.png"
+        alt="Volume Equalizer popup showing Movies preset with 3-band EQ sliders, target loudness at -16 dB, and active status indicator"
+        width="340"
+        height="auto"
+      />
+      <p class="screenshot-caption">// popup interface -- movies preset active</p>
+    </div>
+
+    <!-- What it does -->
+    <section class="section">
+      <p class="section-label">What it does</p>
+      <h2>Consistent volume, everywhere you listen</h2>
+      <p>When you switch from a quiet podcast to a YouTube ad, the sudden volume jump is jarring. Volume Equalizer measures audio loudness in real time and continuously adjusts the gain to bring everything to a consistent target level. It works on YouTube, Twitch, SoundCloud, Vimeo, and any other site that plays audio in the browser.</p>
+      <p>This is not a simple volume booster. A volume booster just multiplies the signal, which makes quiet things louder but does nothing about peaks. Volume Equalizer uses a compressor and automatic gain control together: the compressor tames loud peaks within a clip, and the gain control lifts or reduces the overall level to meet your target. Loud ads get tamed. Quiet dialogue gets lifted. The result is audio that stays in a comfortable range without you touching anything.</p>
+      <p>The processing happens entirely inside your browser using the Web Audio API. Nothing is sent anywhere. The extension makes zero network requests and stores only your settings locally via <code>chrome.storage.local</code>.</p>
+    </section>
+
+    <!-- Features -->
+    <section class="section">
+      <p class="section-label">Features</p>
+      <h2>What you get</h2>
+      <div class="features-grid">
+        <div class="feature">
+          <p class="feature-title">Smart auto-normalization</p>
+          <p>Measures loudness 10 times per second using RMS analysis and adjusts gain smoothly with no audible clicks or pops.</p>
+        </div>
+        <div class="feature">
+          <p class="feature-title">Dynamic compression</p>
+          <p>A DynamicsCompressor tames peaks before the gain stage, so sudden loud moments get handled before they reach your speakers.</p>
+        </div>
+        <div class="feature">
+          <p class="feature-title">3-band equalizer</p>
+          <p>Separate Bass (150 Hz), Mid (1 kHz), and Treble (5 kHz) sliders with +/-12 dB range each. Double-click any band to reset.</p>
+        </div>
+        <div class="feature">
+          <p class="feature-title">Four built-in presets</p>
+          <p>Default, Movies, Music, and Podcasts. Each preset sets loudness target, compression intensity, boost cap, and EQ in one click.</p>
+        </div>
+        <div class="feature">
+          <p class="feature-title">Safety limiter</p>
+          <p>A brick-wall limiter at -1 dB sits at the end of the chain and prevents any clipping regardless of EQ or gain settings.</p>
+        </div>
+        <div class="feature">
+          <p class="feature-title">True bypass</p>
+          <p>One toggle routes the original audio directly to your speakers with zero processing. Use it to A/B compare processed vs. unmodified sound.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- How it works -->
+    <section class="section" id="how-it-works">
+      <p class="section-label">How it works</p>
+      <h2>The audio chain, explained</h2>
+
+      <p>Volume Equalizer intercepts audio from HTML media elements using the Web Audio API and routes it through a processing chain before it reaches your speakers. The chain runs entirely in the browser process with no external calls.</p>
+
+      <div class="audio-chain">
+        <span class="node">MediaElement</span>
+        <span class="arrow"> -&gt; </span>
+        <span class="node">DynamicsCompressorNode</span>
+        <span class="arrow"> -&gt; </span>
+        <span class="node">AnalyserNode</span>
+        <span class="arrow"> -&gt; </span>
+        <span class="node">GainNode (AGC)</span>
+        <br />
+        <span class="arrow">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -&gt; </span>
+        <span class="node">BiquadFilter (Bass 150 Hz)</span>
+        <span class="arrow"> -&gt; </span>
+        <span class="node">BiquadFilter (Mid 1 kHz)</span>
+        <span class="arrow"> -&gt; </span>
+        <span class="node">BiquadFilter (Treble 5 kHz)</span>
+        <br />
+        <span class="arrow">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -&gt; </span>
+        <span class="node">DynamicsCompressorNode (limiter -1 dB)</span>
+        <span class="arrow"> -&gt; </span>
+        <span class="node">AudioDestination</span>
+      </div>
+
+      <div class="tech-detail">
+        <strong>Compressor</strong><br />
+        The first compressor handles within-track dynamics. Threshold ranges from -24 dB (Intensity 0%) to -48 dB (Intensity 100%), ratio from 4:1 to 20:1. Attack is fixed at 3 ms; release adjusts with intensity from 100 ms to 250 ms.
+      </div>
+
+      <div class="tech-detail">
+        <strong>AGC loop</strong><br />
+        Every 100 ms the <code>AnalyserNode</code> reads a 2048-sample time-domain buffer. RMS is computed over the full frame, then converted to an approximate loudness figure: <code>loudness = 20 * log10(RMS)</code>. The error vs. your target loudness is converted to a linear gain multiplier and applied to the <code>GainNode</code> via <code>setTargetAtTime()</code> with a 0.5-second smoothing constant. This prevents abrupt gain jumps. Silence frames (RMS below 0.001) are skipped so the gain does not drift upward into noise.
+      </div>
+
+      <div class="tech-detail">
+        <strong>3-band EQ</strong><br />
+        Three <code>BiquadFilterNode</code> instances in series. Bass uses a <code>lowshelf</code> type at 150 Hz. Mid uses a <code>peaking</code> type at 1 kHz with Q of 1.0. Treble uses a <code>highshelf</code> type at 5 kHz. Each band is clamped to +/-12 dB.
+      </div>
+
+      <div class="tech-detail">
+        <strong>Limiter</strong><br />
+        A second <code>DynamicsCompressorNode</code> acts as a hard limiter: threshold at -1 dB, hard knee, 20:1 ratio, 1 ms attack, 50 ms release. This is the final safety net that catches any signal that exceeds 0 dBFS after EQ boost or AGC overshoot.
+      </div>
+
+      <p>The bypass path is a separate <code>GainNode</code> that connects the source directly to the destination. When bypass is active, the processed chain gain is set to 0 and the bypass gain is set to 1. No processing happens, and the Web Audio graph is not torn down, so toggling back on is instant.</p>
+    </section>
+
+    <!-- Where it works -->
+    <section class="section">
+      <p class="section-label">Compatibility</p>
+      <h2>Where it works</h2>
+      <p>Volume Equalizer works on any website that uses standard HTML5 audio or video elements. It hooks into <code>HTMLMediaElement</code> instances via the Web Audio API and also attaches to elements added dynamically, so it handles single-page apps like YouTube and Twitch without any extra setup.</p>
+
+      <div class="sites-list">
+        <span class="site-tag">YouTube</span>
+        <span class="site-tag">Twitch</span>
+        <span class="site-tag">SoundCloud</span>
+        <span class="site-tag">Vimeo</span>
+        <span class="site-tag">Spotify Web Player*</span>
+        <span class="site-tag">Netflix*</span>
+        <span class="site-tag">Podcast players</span>
+        <span class="site-tag">Online radio</span>
+        <span class="site-tag">News sites</span>
+        <span class="site-tag">Any HTML5 audio/video</span>
+      </div>
+
+      <p style="margin-top: 1rem; font-size: 0.85rem; color: var(--muted);">* On DRM-protected platforms like Netflix and Spotify Web Player, the browser blocks third-party access to the audio stream. Volume Equalizer detects this and automatically routes the audio through unchanged. You will hear the original audio without any processing.</p>
+
+      <p>Read more: <a href="/blog/fix-loud-ads-youtube/">Why YouTube ads sound louder than videos and how to fix it</a></p>
+    </section>
+
+    <!-- FAQ -->
+    <section class="section">
+      <p class="section-label">FAQ</p>
+      <h2>Common questions</h2>
+
+      <div class="faq-item">
+        <p class="faq-q">Does it work on Netflix?</p>
+        <p class="faq-a">Not on the audio itself. Netflix uses DRM (Encrypted Media Extensions) that prevents browser extensions from accessing the audio stream. Volume Equalizer detects this and silently passes the original audio through unchanged. Netflix still plays normally, it just will not be normalized.</p>
+      </div>
+
+      <div class="faq-item">
+        <p class="faq-q">Is any of my data collected?</p>
+        <p class="faq-a">No. The extension collects nothing. It stores your settings (EQ values, loudness target, preset) locally on your device via <code>chrome.storage.local</code>. No servers, no analytics, no tracking of any kind. Read the full <a href="/volume-equalizer/privacy.html">privacy policy</a>.</p>
+      </div>
+
+      <div class="faq-item">
+        <p class="faq-q">Will it affect audio quality?</p>
+        <p class="faq-a">Minimal impact. The Web Audio API processes audio at 32-bit float precision internally. The compressor and limiter are designed to be transparent at moderate settings. The Music preset is tuned with low intensity and a small boost cap specifically to preserve dynamics. If you want zero coloration, the bypass mode routes audio with no processing at all.</p>
+      </div>
+
+      <div class="faq-item">
+        <p class="faq-q">Does it work on all tabs at the same time?</p>
+        <p class="faq-a">Each tab runs its own instance of the content script with its own audio chain. Settings are shared across tabs via <code>chrome.storage</code>, so changing the target loudness in the popup applies to all active tabs within a second or two.</p>
+      </div>
+
+      <div class="faq-item">
+        <p class="faq-q">Can I use just the EQ without normalization?</p>
+        <p class="faq-a">The EQ runs as part of the processing chain whenever the extension is enabled. There is no way to use only the EQ while disabling the AGC separately in the current version. If you want flat dynamics with EQ, set Intensity to 0% and Max Boost to 1.0x.</p>
+      </div>
+
+      <div class="faq-item">
+        <p class="faq-q">Why does audio on some embedded videos stay unnormalized?</p>
+        <p class="faq-a">Videos embedded via cross-origin iframes can sometimes load before the content script attaches. The extension monitors for dynamically added media elements and attaches on the first play event, so the next time you play the video it should be normalized.</p>
+      </div>
+
+      <div class="faq-item">
+        <p class="faq-q">Why is it called Volume Equalizer and not Loudness Normalizer?</p>
+        <p class="faq-a">Because it does both. The normalization side handles loudness consistency across clips and sources. The equalizer side handles tonal balance per your preferences. The name reflects the full feature set rather than just one part of it.</p>
+      </div>
+    </section>
+
+    <!-- Privacy strip -->
+    <div class="privacy-strip">
+      <span class="privacy-icon">&#9632;</span>
+      <p>No data collection. No accounts. No network requests. All processing is local. <a href="/volume-equalizer/privacy.html">Read the privacy policy</a></p>
+    </div>
+
+    <!-- Bottom CTA -->
+    <div class="cta-bottom">
+      <h2>Ready to fix your volume?</h2>
+      <p>Free to install. Works immediately after adding to Chrome.</p>
+      <a
+        href="https://chromewebstore.google.com/detail/volume-equalizer/ibolchncmlkfefbmpimdfcpkdambafoi"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="btn-install"
+      >Install for free -&gt;</a>
+      <br />
+      <a href="/blog/fix-loud-ads-youtube/" class="blog-link">Read: why YouTube ads are louder than videos -&gt;</a>
+    </div>
+  </div>
+
+  <footer>
+    <span class="footer-logo">LOBOV LABS &#169; 2026</span>
+    <ul class="footer-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="/products.html">Products</a></li>
+      <li><a href="/volume-equalizer/privacy.html">Privacy</a></li>
+      <li><a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#108;&#111;&#98;&#111;&#118;&#108;&#97;&#98;&#115;&#64;&#112;&#114;&#111;&#116;&#111;&#110;&#46;&#109;&#101;">&#108;&#111;&#98;&#111;&#118;&#108;&#97;&#98;&#115;&#64;&#112;&#114;&#111;&#116;&#111;&#110;&#46;&#109;&#101;</a></li>
+    </ul>
+  </footer>
+
+</body>
+</html>
