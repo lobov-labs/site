@@ -372,8 +372,21 @@
       font-weight: 500;
     }
 
-    .audio-chain .arrow {
+    .chain-row {
+      display: flex;
+      align-items: baseline;
+      gap: 1rem;
+    }
+
+    .chain-arrow {
       color: #444;
+      padding-left: 0.25rem;
+      line-height: 1.4;
+    }
+
+    .chain-comment {
+      color: #555;
+      font-size: 0.72rem;
     }
 
     .tech-detail {
@@ -638,25 +651,23 @@
       <p>Volume Equalizer intercepts audio from HTML media elements using the Web Audio API and routes it through a processing chain before it reaches your speakers. The chain runs entirely in the browser process with no external calls.</p>
 
       <div class="audio-chain">
-        <span class="node">MediaElement</span>
-        <span class="arrow"> -&gt; </span>
-        <span class="node">DynamicsCompressorNode</span>
-        <span class="arrow"> -&gt; </span>
-        <span class="node">AnalyserNode</span>
-        <span class="arrow"> -&gt; </span>
-        <span class="node">GainNode (AGC)</span>
-        <br />
-        <span class="arrow">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -&gt; </span>
-        <span class="node">BiquadFilter (Bass 150 Hz)</span>
-        <span class="arrow"> -&gt; </span>
-        <span class="node">BiquadFilter (Mid 1 kHz)</span>
-        <span class="arrow"> -&gt; </span>
-        <span class="node">BiquadFilter (Treble 5 kHz)</span>
-        <br />
-        <span class="arrow">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -&gt; </span>
-        <span class="node">DynamicsCompressorNode (limiter -1 dB)</span>
-        <span class="arrow"> -&gt; </span>
-        <span class="node">AudioDestination</span>
+        <div class="chain-row"><span class="node">MediaElement</span></div>
+        <div class="chain-arrow">&#8595;</div>
+        <div class="chain-row"><span class="node">DynamicsCompressorNode</span> <span class="chain-comment">// compressor</span></div>
+        <div class="chain-arrow">&#8595;</div>
+        <div class="chain-row"><span class="node">AnalyserNode</span> <span class="chain-comment">// RMS measurement for AGC</span></div>
+        <div class="chain-arrow">&#8595;</div>
+        <div class="chain-row"><span class="node">GainNode</span> <span class="chain-comment">// AGC gain</span></div>
+        <div class="chain-arrow">&#8595;</div>
+        <div class="chain-row"><span class="node">BiquadFilter</span> <span class="chain-comment">// bass, lowshelf 150 Hz</span></div>
+        <div class="chain-arrow">&#8595;</div>
+        <div class="chain-row"><span class="node">BiquadFilter</span> <span class="chain-comment">// mid, peaking 1 kHz Q=1.0</span></div>
+        <div class="chain-arrow">&#8595;</div>
+        <div class="chain-row"><span class="node">BiquadFilter</span> <span class="chain-comment">// treble, highshelf 5 kHz</span></div>
+        <div class="chain-arrow">&#8595;</div>
+        <div class="chain-row"><span class="node">DynamicsCompressorNode</span> <span class="chain-comment">// limiter -1 dB</span></div>
+        <div class="chain-arrow">&#8595;</div>
+        <div class="chain-row"><span class="node">AudioDestination</span></div>
       </div>
 
       <div class="tech-detail">
@@ -693,15 +704,11 @@
         <span class="site-tag">Twitch</span>
         <span class="site-tag">SoundCloud</span>
         <span class="site-tag">Vimeo</span>
-        <span class="site-tag">Spotify Web Player*</span>
-        <span class="site-tag">Netflix*</span>
         <span class="site-tag">Podcast players</span>
         <span class="site-tag">Online radio</span>
         <span class="site-tag">News sites</span>
         <span class="site-tag">Any HTML5 audio/video</span>
       </div>
-
-      <p style="margin-top: 1rem; font-size: 0.85rem; color: var(--muted);">* On DRM-protected platforms like Netflix and Spotify Web Player, the browser blocks third-party access to the audio stream. Volume Equalizer detects this and automatically routes the audio through unchanged. You will hear the original audio without any processing.</p>
 
       <p>Read more: <a href="/blog/fix-loud-ads-youtube/">Why YouTube ads sound louder than videos and how to fix it</a></p>
     </section>
