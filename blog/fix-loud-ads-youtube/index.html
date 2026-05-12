@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YouTube Ads Too Loud? Here's Why and How to Fix It</title>
+  <meta name="description" content="YouTube ads sound louder than videos because they are mixed at different loudness levels. Learn why YouTube normalization falls short and how to fix volume jumps for good." />
+  <link rel="canonical" href="https://lobovlabs.com/blog/fix-loud-ads-youtube/" />
+
+  <meta property="og:type" content="article" />
+  <meta property="og:url" content="https://lobovlabs.com/blog/fix-loud-ads-youtube/" />
+  <meta property="og:title" content="YouTube Ads Too Loud? Here's Why and How to Fix It" />
+  <meta property="og:description" content="YouTube ads sound louder than videos because they are mixed at different loudness levels. Learn why YouTube normalization falls short and how to fix volume jumps for good." />
+  <meta property="og:site_name" content="Lobov Labs" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Why are YouTube ads louder than the videos?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "YouTube normalizes creator content to around -14 LUFS using its loudness normalization system, but ads are delivered through a separate pipeline and may not go through the same normalization. Ad creatives are often mastered loud by advertisers to grab attention, and the gap between ad volume and video volume can be noticeable."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does YouTube have a built-in volume normalizer?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "YouTube applies loudness normalization to uploaded videos targeting around -14 LUFS integrated loudness. However, this normalization applies per-video at upload time and does not affect ads or smooth transitions between different videos that were uploaded at different times."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I stop YouTube ads from being louder than videos?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The most effective solution is a browser extension that normalizes audio in real time. Volume Equalizer for Chrome measures loudness continuously using automatic gain control and keeps everything at a consistent level, including ads. Install it free from the Chrome Web Store."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does Windows Loudness Equalization fix YouTube ads?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Windows Loudness Equalization (found in Sound settings) applies post-processing at the OS audio driver level. It can help reduce the overall dynamic range but it works on the final mixed output from all apps, has no per-tab or per-source control, and its behavior depends on the audio driver and hardware."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <style>
+    :root {
+      --bg:       #0d0d0d;
+      --surface:  #141414;
+      --border:   #222;
+      --muted:    #777;
+      --text:     #c8c8c8;
+      --bright:   #f0f0f0;
+      --accent:   #e8a030;
+      --accent2:  #c06820;
+      --mono:     'IBM Plex Mono', monospace;
+      --sans:     'IBM Plex Sans', sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 16px;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.6;
+    }
+
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2.5rem;
+      height: 56px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(13,13,13,0.85);
+      backdrop-filter: blur(12px);
+    }
+
+    .nav-logo {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--bright);
+      text-decoration: none;
+      letter-spacing: 0.08em;
+      display: flex;
+      align-items: center;
+    }
+
+    .nav-logo .cursor {
+      display: inline-block;
+      width: 8px;
+      height: 14px;
+      background: var(--accent);
+      animation: blink 1.1s step-end infinite;
+      vertical-align: middle;
+      margin-left: 2px;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-decoration: none;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--accent); }
+
+    .page-header {
+      position: relative;
+      z-index: 1;
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 9rem 2.5rem 3rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .breadcrumb {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      margin-bottom: 1.25rem;
+    }
+
+    .breadcrumb a {
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .breadcrumb a:hover { color: var(--text); }
+    .breadcrumb span { color: var(--accent); }
+
+    .page-header h1 {
+      font-family: var(--sans);
+      font-size: clamp(1.5rem, 4vw, 2.2rem);
+      font-weight: 500;
+      color: var(--bright);
+      line-height: 1.3;
+      margin-bottom: 0.75rem;
+    }
+
+    .page-header .meta {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--muted);
+      letter-spacing: 0.06em;
+    }
+
+    .content {
+      position: relative;
+      z-index: 1;
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 3rem 2.5rem 6rem;
+    }
+
+    .content h2 {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--accent);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+      margin-top: 2.5rem;
+    }
+
+    .content h2::before { content: '// '; opacity: 0.5; }
+
+    .content h2:first-child { margin-top: 0; }
+
+    .content h3 {
+      font-family: var(--mono);
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--bright);
+      margin: 1.5rem 0 0.75rem;
+      letter-spacing: 0.03em;
+    }
+
+    .content p {
+      font-size: 0.97rem;
+      color: var(--text);
+      line-height: 1.85;
+      margin-bottom: 1rem;
+    }
+
+    .content p:last-child { margin-bottom: 0; }
+
+    .content a {
+      color: var(--accent);
+      text-decoration: none;
+      border-bottom: 1px solid var(--accent2);
+      transition: border-color 0.2s;
+    }
+
+    .content a:hover { border-color: var(--accent); }
+
+    .content ul {
+      list-style: none;
+      margin: 0.75rem 0 1rem;
+    }
+
+    .content ul li {
+      font-size: 0.97rem;
+      color: var(--text);
+      line-height: 1.8;
+      padding-left: 1.25rem;
+      position: relative;
+      margin-bottom: 0.25rem;
+    }
+
+    .content ul li::before {
+      content: '->';
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+      opacity: 0.6;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+    }
+
+    code {
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      color: var(--accent);
+      background: var(--surface);
+      padding: 0.1em 0.35em;
+    }
+
+    .highlight-box {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      padding: 1.25rem 1.5rem;
+      margin: 1.5rem 0;
+    }
+
+    .highlight-box p {
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      color: var(--text);
+      line-height: 1.7;
+      margin: 0;
+    }
+
+    .highlight-box strong { color: var(--accent); }
+
+    /* Comparison table */
+    .comparison {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 0.88rem;
+    }
+
+    .comparison th {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      font-weight: 500;
+      color: var(--accent);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      text-align: left;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .comparison td {
+      padding: 0.75rem 1rem;
+      color: var(--text);
+      border-bottom: 1px solid #1a1a1a;
+      vertical-align: top;
+    }
+
+    .comparison tr:last-child td { border-bottom: none; }
+    .comparison td:first-child { font-family: var(--mono); font-size: 0.8rem; color: var(--bright); white-space: nowrap; }
+
+    .check { color: #5dba6e; font-family: var(--mono); }
+    .cross { color: #883030; font-family: var(--mono); }
+    .partial { color: var(--accent); font-family: var(--mono); }
+
+    /* CTA box */
+    .cta-box {
+      border: 1px solid var(--accent);
+      background: rgba(232, 160, 48, 0.05);
+      padding: 2rem;
+      margin: 2.5rem 0;
+      text-align: center;
+    }
+
+    .cta-box p {
+      font-size: 0.95rem;
+      color: var(--text);
+      margin-bottom: 1.25rem;
+    }
+
+    .btn-install {
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--bg);
+      background: var(--accent);
+      border: none;
+      padding: 0.85rem 2rem;
+      cursor: pointer;
+      text-decoration: none;
+      border-bottom: none;
+      transition: background 0.2s;
+      display: inline-block;
+    }
+
+    .btn-install:hover { background: var(--accent2); border-bottom: none; }
+
+    /* FAQ section */
+    .faq-item {
+      border-top: 1px solid var(--border);
+      padding: 1.5rem 0;
+    }
+
+    .faq-item:last-child { border-bottom: 1px solid var(--border); }
+
+    .faq-q {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--bright);
+      margin-bottom: 0.75rem;
+    }
+
+    .faq-a {
+      font-size: 0.95rem;
+      color: var(--text);
+      line-height: 1.8;
+    }
+
+    footer {
+      position: relative;
+      z-index: 1;
+      border-top: 1px solid var(--border);
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 2rem 2.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .footer-logo {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 1.5rem;
+      list-style: none;
+    }
+
+    .footer-links a {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-decoration: none;
+      letter-spacing: 0.06em;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover { color: var(--text); }
+
+    @media (max-width: 640px) {
+      nav { padding: 0 1.25rem; }
+      .page-header, .content { padding-left: 1.25rem; padding-right: 1.25rem; }
+      footer { padding: 1.5rem 1.25rem; }
+      .comparison { font-size: 0.8rem; }
+      .comparison th, .comparison td { padding: 0.6rem 0.6rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="/" class="nav-logo">LL<span class="cursor"></span></a>
+    <ul class="nav-links">
+      <li><a href="/products.html">Products</a></li>
+      <li><a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#108;&#111;&#98;&#111;&#118;&#108;&#97;&#98;&#115;&#64;&#112;&#114;&#111;&#116;&#111;&#110;&#46;&#109;&#101;">Contact</a></li>
+    </ul>
+  </nav>
+
+  <header class="page-header">
+    <p class="breadcrumb">
+      <a href="/">lobovlabs.com</a>
+      <span> / blog / </span>
+      <span>fix-loud-ads-youtube</span>
+    </p>
+    <h1>YouTube Ads Too Loud? Here's Why and How to Fix It</h1>
+    <p class="meta">Lobov Labs &nbsp;&middot;&nbsp; May 2026 &nbsp;&middot;&nbsp; 8 min read</p>
+  </header>
+
+  <main class="content">
+
+    <p>You are watching a video at a comfortable volume. Then an ad starts and suddenly you are scrambling for the mute button. This is one of the most common complaints about YouTube, and it has been around for years. The fix is simpler than most people think, but first it helps to understand why it happens.</p>
+
+    <h2>The loudness problem</h2>
+
+    <p>Audio loudness is not as straightforward as "how high is the waveform." Two clips with the same peak level can sound very different in perceived loudness depending on how much of the signal is near the peak. A 30-second ad with constant loud music feels much louder than a 10-minute documentary at the same peak level, even though a level meter would show them as equal.</p>
+
+    <p>The broadcast and streaming industry settled on LUFS (Loudness Units relative to Full Scale) as the standard for measuring perceived loudness. LUFS integrates short-term loudness measurements over time and weights them to match how human hearing perceives different frequencies. A target of -14 LUFS, for example, means the integrated loudness of a piece of audio should average to -14 dB below full scale.</p>
+
+    <p>YouTube applies loudness normalization to uploaded videos. Content that is mastered too loud gets turned down to the platform target, roughly -14 LUFS. Content that is mastered quiet stays as-is, since YouTube does not boost quiet videos. The system works reasonably well for creator content. The problem is ads.</p>
+
+    <h2>Why ads are different</h2>
+
+    <p>Ads on YouTube are delivered through a separate pipeline from creator content. Advertisers submit their video creatives to Google Ads, and those creatives do not always go through the same loudness normalization as organic YouTube videos. Some ad buyers apply heavy compression and limiting to their audio to maximize perceived loudness within the allowed peak level, a technique sometimes called the "loudness war."</p>
+
+    <p>Even when YouTube does normalize ad creatives, the transition between the normalized ad and the video that follows can be jarring if the video was uploaded at a lower integrated loudness level. YouTube normalizes each piece of content independently, but it does not smooth the transition between them.</p>
+
+    <p>The result: the ad ends, your video resumes, and the perceived volume drops noticeably. Or the opposite happens and the ad blows your eardrums.</p>
+
+    <h2>Why system-level solutions fall short</h2>
+
+    <p>Most people who have tried to fix this problem have reached for a system-level solution first. Here is why those approaches have limits.</p>
+
+    <h3>Windows Loudness Equalization</h3>
+
+    <p>Windows has a feature called "Loudness Equalization" in the audio device properties (Playback devices -&gt; your device -&gt; Properties -&gt; Enhancements). It applies dynamic range compression to the final audio output from all applications mixed together. It can soften the harshest jumps, but it has no visibility into individual sources. It compresses everything coming out of your speakers at once, which means it cannot distinguish between a loud ad and a loud explosion in a movie you are watching at the volume you chose. It also depends on the audio driver supporting it, and many drivers do not implement it well.</p>
+
+    <h3>macOS Sound Check</h3>
+
+    <p>macOS has no direct equivalent to Windows Loudness Equalization at the system level. Some people use third-party tools like Boom or eqMac, which work at the CoreAudio level. These can be effective but they cost money and, like Windows Loudness Equalization, they operate on the final mixed output from all apps simultaneously.</p>
+
+    <h3>YouTube's built-in normalization</h3>
+
+    <p>YouTube has a setting in the player (the gear icon) that was historically called "Stable Volume" and appears in some clients. It provides some leveling for the current video but it does not help with ad-to-video transitions and it is not consistently available across all YouTube clients and regions.</p>
+
+    <div class="highlight-box">
+      <p><strong>The core problem with OS-level solutions:</strong> they cannot distinguish between different sources playing through the browser. A tab playing a podcast and a tab playing a game both route through the same system output. Per-source control requires working at the browser level, not the OS level.</p>
+    </div>
+
+    <h2>The browser extension approach</h2>
+
+    <p>A browser extension can work directly with the Web Audio API inside Chrome, which gives it per-element control over audio. Instead of compressing everything coming out of your speakers, it intercepts individual <code>HTMLMediaElement</code> instances (video and audio tags) inside each tab and routes them through a custom audio processing graph.</p>
+
+    <p>This means the extension knows exactly which video element is playing and can measure its loudness independently. It does not touch your system volume, does not affect other apps, and can respond to loudness changes at the level of individual clips rather than the entire output mix.</p>
+
+    <h2>How Volume Equalizer handles it</h2>
+
+    <p><a href="/volume-equalizer/">Volume Equalizer</a> is a Chrome extension built around a real-time automatic gain control (AGC) loop. Here is what happens when you play a video with it installed:</p>
+
+    <ul>
+      <li>The extension creates a Web Audio processing chain for the video element using <code>createMediaElementSource()</code></li>
+      <li>Every 100 ms, an <code>AnalyserNode</code> reads a 2048-sample buffer of the audio signal after the compressor stage</li>
+      <li>The extension computes RMS (root mean square) over the buffer, converts it to decibels: <code>20 * log10(RMS)</code></li>
+      <li>It compares this to your target loudness (default -18 dB, adjustable from -30 to -10) and computes the gain correction needed</li>
+      <li>The correction is applied to a <code>GainNode</code> via <code>setTargetAtTime()</code> with a smoothing constant, so gain changes happen gradually without audible artifacts</li>
+    </ul>
+
+    <p>When an ad starts, the loudness measurement rises. The AGC responds within a few hundred milliseconds and reduces the gain to bring the ad back to your target level. When the video resumes, the opposite happens. The transition is smooth because the gain ramp uses <code>setTargetAtTime()</code> rather than an abrupt step.</p>
+
+    <p>A dynamic compressor upstream of the AGC handles within-clip peaks, so the AGC does not have to react to every transient. A brick-wall limiter at -1 dBFS sits at the end of the chain as a final safety net.</p>
+
+    <div class="cta-box">
+      <p>Volume Equalizer is free and takes about 10 seconds to install. Works on YouTube, Twitch, SoundCloud, and any other site with HTML5 audio or video.</p>
+      <a
+        href="https://chromewebstore.google.com/detail/volume-equalizer/ibolchncmlkfefbmpimdfcpkdambafoi"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="btn-install"
+      >Install for Chrome - free -&gt;</a>
+    </div>
+
+    <h2>Comparing the approaches</h2>
+
+    <table class="comparison">
+      <thead>
+        <tr>
+          <th>Solution</th>
+          <th>Per-source control</th>
+          <th>Works on ads</th>
+          <th>No setup</th>
+          <th>Free</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Windows Loudness EQ</td>
+          <td><span class="cross">no</span></td>
+          <td><span class="partial">partial</span></td>
+          <td><span class="partial">mostly</span></td>
+          <td><span class="check">yes</span></td>
+        </tr>
+        <tr>
+          <td>macOS Boom / eqMac</td>
+          <td><span class="cross">no</span></td>
+          <td><span class="partial">partial</span></td>
+          <td><span class="cross">no</span></td>
+          <td><span class="cross">no</span></td>
+        </tr>
+        <tr>
+          <td>YouTube Stable Volume</td>
+          <td><span class="partial">per-tab</span></td>
+          <td><span class="cross">no</span></td>
+          <td><span class="check">yes</span></td>
+          <td><span class="check">yes</span></td>
+        </tr>
+        <tr>
+          <td>DAW / virtual cable</td>
+          <td><span class="check">yes</span></td>
+          <td><span class="check">yes</span></td>
+          <td><span class="cross">no</span></td>
+          <td><span class="partial">mostly</span></td>
+        </tr>
+        <tr>
+          <td>Volume Equalizer</td>
+          <td><span class="check">yes</span></td>
+          <td><span class="check">yes</span></td>
+          <td><span class="check">yes</span></td>
+          <td><span class="check">yes</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>A note on DAWs and virtual audio cables</h2>
+
+    <p>Some power users route browser audio through a virtual cable into a DAW (digital audio workstation) like Reaper or a standalone compressor plugin. This gives precise control and high audio quality, but it requires significant setup, adds latency, and needs to be reconfigured when you switch audio devices. It is a reasonable solution for a studio environment where the setup stays fixed, but it is overkill for casual listening.</p>
+
+    <h2>The LUFS standard and why it matters</h2>
+
+    <p>Understanding LUFS helps make sense of why manual volume adjustment is not a real solution. When a YouTube video is quiet at -23 LUFS and an ad hits at -10 LUFS, that is a 13 dB difference. At typical listening levels, 10 dB is roughly perceived as twice as loud. You cannot set a single system volume that feels comfortable for both.</p>
+
+    <p>The EBU R128 standard recommends -23 LUFS for broadcast. Streaming platforms target different values: Spotify normalizes to -14 LUFS, Apple Music to -16 LUFS, YouTube to around -14 LUFS for video content. Ads often arrive at -9 to -12 LUFS integrated, which is noticeably louder than the content they interrupt.</p>
+
+    <p>Real-time AGC bridges this gap by continuously measuring and correcting, something static volume controls cannot do.</p>
+
+    <h2>FAQ</h2>
+
+    <div class="faq-item">
+      <p class="faq-q">Why are YouTube ads louder than the videos?</p>
+      <p class="faq-a">YouTube normalizes creator content to around -14 LUFS, but ads are delivered through a separate pipeline and may not go through the same normalization. Ad creatives are often mastered loud by advertisers to grab attention, and the gap between ad volume and video volume can be noticeable.</p>
+    </div>
+
+    <div class="faq-item">
+      <p class="faq-q">Does YouTube have a built-in volume normalizer?</p>
+      <p class="faq-a">YouTube applies loudness normalization to uploaded videos targeting around -14 LUFS integrated loudness. However, this normalization applies per-video at upload time and does not affect ads or smooth transitions between different videos.</p>
+    </div>
+
+    <div class="faq-item">
+      <p class="faq-q">How do I stop YouTube ads from being louder than videos?</p>
+      <p class="faq-a">The most effective browser-based solution is a Chrome extension that normalizes audio in real time. <a href="/volume-equalizer/">Volume Equalizer</a> measures loudness continuously using automatic gain control and keeps everything at a consistent level, including ads.</p>
+    </div>
+
+    <div class="faq-item">
+      <p class="faq-q">Does Windows Loudness Equalization fix YouTube ads?</p>
+      <p class="faq-a">It can help reduce the overall dynamic range but it works on the final mixed output from all apps, has no per-tab control, and its behavior depends on the audio driver and hardware. It cannot distinguish between an ad and the video that follows it.</p>
+    </div>
+
+    <p style="margin-top: 2rem;">Related: <a href="/volume-equalizer/">Volume Equalizer - Auto-normalize loudness in Chrome</a></p>
+
+  </main>
+
+  <footer>
+    <span class="footer-logo">LOBOV LABS &#169; 2026</span>
+    <ul class="footer-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="/products.html">Products</a></li>
+      <li><a href="/volume-equalizer/">Volume Equalizer</a></li>
+    </ul>
+  </footer>
+
+</body>
+</html>
