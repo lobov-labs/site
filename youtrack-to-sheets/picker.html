@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Select spreadsheet</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{background:#111318;color:#e2e6f0;font-family:'Inter',system-ui,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;}
+    .state{text-align:center;padding:40px;}
+    .spinner{width:36px;height:36px;border:3px solid #2d3140;border-top-color:#6c8eff;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 16px;}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    p{font-size:13px;color:#8b92a8;}
+    .error{color:#f87171;font-size:13px;}
+  </style>
+</head>
+<body>
+<div class="state" id="state">
+  <div class="spinner"></div>
+  <p id="msg">Loading…</p>
+</div>
+<script src="picker-config.js"></script>
+<script>
+  const ALLOWED_ORIGIN = 'chrome-extension://';
+
+  let pickerApiLoaded = false;
+  let oauthToken = null;
+
+  // Tell the extension we are ready
+  window.opener.postMessage({ type: 'PICKER_READY' }, '*');
+
+  window.addEventListener('message', function(event) {
+    // Accept only from our extension (any chrome-extension:// origin)
+    if (!event.origin.startsWith('chrome-extension://')) return;
+    if (event.data.type !== 'INIT') return;
+    oauthToken = event.data.token;
+    loadPicker();
+  });
+
+  function loadPicker() {
+    document.getElementById('msg').textContent = 'Loading Google Picker…';
+    const script = document.createElement('script');
+    script.src = 'https://apis.google.com/js/api.js';
+    script.onload = () => {
+      gapi.load('picker', { callback: onPickerApiLoad });
+    };
+    script.onerror = () => showError('Failed to load Google API');
+    document.head.appendChild(script);
+  }
+
+  function onPickerApiLoad() {
+    pickerApiLoaded = true;
+    createPicker();
+  }
+
+  function createPicker() {
+    if (!pickerApiLoaded || !oauthToken) return;
+
+    document.getElementById('msg').textContent = 'Opening picker…';
+
+    const view = new google.picker.DocsView(google.picker.ViewId.SPREADSHEETS)
+      .setIncludeFolders(false)
+      .setSelectFolderEnabled(false);
+
+    const picker = new google.picker.PickerBuilder()
+      .addView(view)
+      .setOAuthToken(oauthToken)
+      .setDeveloperKey(window.PICKER_API_KEY)
+      .setCallback(pickerCallback)
+      .build();
+
+    picker.setVisible(true);
+
+    // Hide the loading state once the picker iframe appears
+    setTimeout(() => {
+      document.getElementById('state').style.display = 'none';
+    }, 600);
+  }
+
+  function pickerCallback(data) {
+    if (data.action === google.picker.Action.PICKED) {
+      const doc = data.docs[0];
+      window.opener.postMessage({
+        type: 'PICKER_SELECTED',
+        fileId: doc.id,
+        fileName: doc.name
+      }, '*');
+      window.close();
+    } else if (data.action === google.picker.Action.CANCEL) {
+      window.opener.postMessage({ type: 'PICKER_CANCEL' }, '*');
+      window.close();
+    }
+  }
+
+  function showError(msg) {
+    document.getElementById('msg').className = 'error';
+    document.getElementById('msg').textContent = msg;
+  }
+</script>
+</body>
+</html>
