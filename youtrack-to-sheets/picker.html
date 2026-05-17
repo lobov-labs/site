@@ -11,12 +11,15 @@
     @keyframes spin{to{transform:rotate(360deg)}}
     p{font-size:13px;color:#8b92a8;}
     .error{color:#f87171;font-size:13px;}
+    .back-btn{margin-top:16px;padding:8px 18px;background:#1c1f27;border:1px solid #2d3140;border-radius:7px;color:#6c8eff;font-size:12px;font-weight:600;cursor:pointer;display:none;}
+    .back-btn:hover{background:#22262f;border-color:#6c8eff;}
   </style>
 </head>
 <body>
 <div class="state" id="state">
-  <div class="spinner"></div>
+  <div class="spinner" id="spinner"></div>
   <p id="msg">Loading…</p>
+  <button class="back-btn" id="backBtn">← Try another file</button>
 </div>
 <script src="picker-config.js"></script>
 <script>
@@ -39,6 +42,8 @@
     document.head.appendChild(script);
   }
 
+  let picker;
+
   function createPicker() {
     document.getElementById('msg').textContent = 'Opening picker…';
 
@@ -46,7 +51,7 @@
       .setIncludeFolders(false)
       .setSelectFolderEnabled(false);
 
-    const picker = new google.picker.PickerBuilder()
+    picker = new google.picker.PickerBuilder()
       .addView(view)
       .setOAuthToken(token)
       .setDeveloperKey(window.PICKER_API_KEY)
@@ -54,6 +59,15 @@
       .build();
 
     picker.setVisible(true);
+
+    document.getElementById('backBtn').addEventListener('click', () => {
+      document.getElementById('backBtn').style.display = 'none';
+      document.getElementById('spinner').style.display = '';
+      document.getElementById('msg').className = '';
+      document.getElementById('msg').textContent = 'Opening picker…';
+      document.getElementById('state').style.display = 'none';
+      picker.setVisible(true);
+    });
 
     setTimeout(() => {
       document.getElementById('state').style.display = 'none';
@@ -64,6 +78,8 @@
     if (data.action === google.picker.Action.PICKED) {
       const doc = data.docs[0];
       document.getElementById('state').style.display = 'flex';
+      document.getElementById('spinner').style.display = '';
+      document.getElementById('backBtn').style.display = 'none';
       document.getElementById('msg').className = '';
       document.getElementById('msg').textContent = 'Checking access…';
       try {
@@ -71,14 +87,15 @@
           `https://www.googleapis.com/drive/v3/files/${doc.id}?fields=capabilities.canEdit`,
           { headers: { Authorization: 'Bearer ' + token } }
         );
-        const json = await resp.json();
-        if (!json.capabilities?.canEdit) {
-          showError('This spreadsheet is read-only. Please select one you can edit.');
-          return;
+        if (resp.ok) {
+          const json = await resp.json();
+          if (json.capabilities?.canEdit === false) {
+            showError('This spreadsheet is read-only. Please select one you can edit.');
+            return;
+          }
         }
       } catch {
-        showError('Could not verify access. Please try again.');
-        return;
+        // access check failed — proceed and let Sheets API handle it
       }
       chrome.runtime.sendMessage(extId, {
         type: 'PICKER_SELECTED',
@@ -91,9 +108,11 @@
   }
 
   function showError(msg) {
+    document.getElementById('spinner').style.display = 'none';
     const el = document.getElementById('msg');
     el.className = 'error';
     el.textContent = msg;
+    document.getElementById('backBtn').style.display = 'inline-block';
   }
 </script>
 </body>
