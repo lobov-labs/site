@@ -20,41 +20,26 @@
 </div>
 <script src="picker-config.js"></script>
 <script>
-  const ALLOWED_ORIGIN = 'chrome-extension://';
+  const params = new URLSearchParams(window.location.search);
+  const extId = params.get('ext');
+  const token = decodeURIComponent(window.location.hash.slice(1));
 
-  let pickerApiLoaded = false;
-  let oauthToken = null;
-
-  // Tell the extension we are ready
-  window.opener.postMessage({ type: 'PICKER_READY' }, '*');
-
-  window.addEventListener('message', function(event) {
-    // Accept only from our extension (any chrome-extension:// origin)
-    if (!event.origin.startsWith('chrome-extension://')) return;
-    if (event.data.type !== 'INIT') return;
-    oauthToken = event.data.token;
+  if (!extId || !token) {
+    showError('Missing extension parameters.');
+  } else {
     loadPicker();
-  });
+  }
 
   function loadPicker() {
     document.getElementById('msg').textContent = 'Loading Google Picker…';
     const script = document.createElement('script');
     script.src = 'https://apis.google.com/js/api.js';
-    script.onload = () => {
-      gapi.load('picker', { callback: onPickerApiLoad });
-    };
+    script.onload = () => gapi.load('picker', createPicker);
     script.onerror = () => showError('Failed to load Google API');
     document.head.appendChild(script);
   }
 
-  function onPickerApiLoad() {
-    pickerApiLoaded = true;
-    createPicker();
-  }
-
   function createPicker() {
-    if (!pickerApiLoaded || !oauthToken) return;
-
     document.getElementById('msg').textContent = 'Opening picker…';
 
     const view = new google.picker.DocsView(google.picker.ViewId.SPREADSHEETS)
@@ -63,14 +48,13 @@
 
     const picker = new google.picker.PickerBuilder()
       .addView(view)
-      .setOAuthToken(oauthToken)
+      .setOAuthToken(token)
       .setDeveloperKey(window.PICKER_API_KEY)
       .setCallback(pickerCallback)
       .build();
 
     picker.setVisible(true);
 
-    // Hide the loading state once the picker iframe appears
     setTimeout(() => {
       document.getElementById('state').style.display = 'none';
     }, 600);
@@ -79,21 +63,20 @@
   function pickerCallback(data) {
     if (data.action === google.picker.Action.PICKED) {
       const doc = data.docs[0];
-      window.opener.postMessage({
+      chrome.runtime.sendMessage(extId, {
         type: 'PICKER_SELECTED',
         fileId: doc.id,
         fileName: doc.name
-      }, '*');
-      window.close();
+      }, () => window.close());
     } else if (data.action === google.picker.Action.CANCEL) {
-      window.opener.postMessage({ type: 'PICKER_CANCEL' }, '*');
-      window.close();
+      chrome.runtime.sendMessage(extId, { type: 'PICKER_CANCEL' }, () => window.close());
     }
   }
 
   function showError(msg) {
-    document.getElementById('msg').className = 'error';
-    document.getElementById('msg').textContent = msg;
+    const el = document.getElementById('msg');
+    el.className = 'error';
+    el.textContent = msg;
   }
 </script>
 </body>
