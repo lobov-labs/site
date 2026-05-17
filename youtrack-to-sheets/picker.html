@@ -60,9 +60,26 @@
     }, 600);
   }
 
-  function pickerCallback(data) {
+  async function pickerCallback(data) {
     if (data.action === google.picker.Action.PICKED) {
       const doc = data.docs[0];
+      document.getElementById('state').style.display = 'flex';
+      document.getElementById('msg').className = '';
+      document.getElementById('msg').textContent = 'Checking access…';
+      try {
+        const resp = await fetch(
+          `https://www.googleapis.com/drive/v3/files/${doc.id}?fields=capabilities.canEdit`,
+          { headers: { Authorization: 'Bearer ' + token } }
+        );
+        const json = await resp.json();
+        if (!json.capabilities?.canEdit) {
+          showError('This spreadsheet is read-only. Please select one you can edit.');
+          return;
+        }
+      } catch {
+        showError('Could not verify access. Please try again.');
+        return;
+      }
       chrome.runtime.sendMessage(extId, {
         type: 'PICKER_SELECTED',
         fileId: doc.id,
