@@ -294,7 +294,7 @@
       <span> / youtrack-to-sheets / privacy</span>
     </p>
     <h1>Privacy Policy</h1>
-    <p class="meta">YouTrack &#8594; Google Sheets &nbsp;&middot;&nbsp; Last updated: April 2026</p>
+    <p class="meta">YouTrack &#8594; Google Sheets &nbsp;&middot;&nbsp; Last updated: May 2026</p>
   </header>
 
   <main class="content">
@@ -317,6 +317,7 @@
       <ul>
         <li>Issue fields visible on the current YouTrack page (ID, title, status, priority, author, assignee, dates)</li>
         <li>Your Google account identity &#8212; only to authorise writes to Google Sheets on your behalf</li>
+        <li>Your Google account email address &#8212; used solely to populate the &#8220;Added by&#8221; field in the spreadsheet row, so team members can see who exported each issue. The email is written only to the spreadsheet you selected and is not transmitted to any other service.</li>
         <li>The Google Spreadsheet you explicitly select as the export destination</li>
       </ul>
     </div>
@@ -346,7 +347,7 @@
       <h2>Data protection</h2>
       <p>All communication between the extension and Google APIs is conducted exclusively over HTTPS/TLS.</p>
       <p>Authentication is handled via Google OAuth 2.0. The extension does not store your Google account credentials. The OAuth token is stored locally in Chrome&#8217;s secure storage (<code style="font-family: var(--mono); font-size: 0.82rem; color: var(--accent);">chrome.storage.local</code>) and is never transmitted to Lobov Labs servers.</p>
-      <p>Access is limited to the minimum necessary scope (<code style="font-family: var(--mono); font-size: 0.82rem; color: var(--accent);">drive.file</code>), which restricts the extension to only the specific file the user explicitly selects.</p>
+      <p>Access is limited to the minimum necessary scopes: <code style="font-family: var(--mono); font-size: 0.82rem; color: var(--accent);">drive.file</code> and <code style="font-family: var(--mono); font-size: 0.82rem; color: var(--accent);">spreadsheets</code>, which restrict the extension to only the specific spreadsheet the user explicitly selects or creates.</p>
     </div>
 
     <div class="section">
@@ -362,11 +363,12 @@
 
     <div class="section">
       <h2>Google API scopes</h2>
-      <p>The extension requests the following OAuth scope:</p>
+      <p>The extension requests the following OAuth scopes:</p>
       <ul>
-        <li><code style="font-family: var(--mono); font-size: 0.82rem; color: var(--accent);">https://www.googleapis.com/auth/drive.file</code> &#8212; to create and write to files created by or explicitly selected by the user in Google Drive</li>
+        <li><code style="font-family: var(--mono); font-size: 0.82rem; color: var(--accent);">https://www.googleapis.com/auth/drive.file</code> &#8212; to create new spreadsheets in Google Drive on your behalf (used in automatic mode)</li>
+        <li><code style="font-family: var(--mono); font-size: 0.82rem; color: var(--accent);">https://www.googleapis.com/auth/spreadsheets</code> &#8212; to read and write data to the Google Spreadsheet you selected. Required to support writing to existing spreadsheets shared with you by others.</li>
       </ul>
-      <p>This scope grants access only to the specific Google Spreadsheet the user selects. The extension cannot access any other files in your Google Drive.</p>
+      <p>These scopes grant access only to the specific spreadsheet you choose. No other files in your Google Drive are accessed or modified.</p>
     </div>
 
     <div class="section">
@@ -386,6 +388,7 @@
         <li><strong style="color: var(--bright);">activeTab</strong> &#8212; to read YouTrack issue data from the current tab</li>
         <li><strong style="color: var(--bright);">storage</strong> &#8212; to save your OAuth token and last-used spreadsheet ID locally</li>
         <li><strong style="color: var(--bright);">identity</strong> &#8212; to authenticate with Google OAuth 2.0</li>
+        <li><strong style="color: var(--bright);">identity.email</strong> &#8212; to read the signed-in Chrome profile email, used only to populate the &#8220;Added by&#8221; field when exporting to a spreadsheet</li>
         <li><strong style="color: var(--bright);">Host permission for your YouTrack domain</strong> &#8212; to read issue fields from the page</li>
       </ul>
     </div>
