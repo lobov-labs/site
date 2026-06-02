@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>How to Find a Website You Visited But Forgot the Name</title>
+  <meta name="description" content="You read a page last week and cannot find it again. Here is why browser history search fails and how on-device AI lets you find a website you forgot by describing what it was about." />
+  <link rel="canonical" href="https://lobovlabs.com/blog/find-website-you-forgot/" />
+
+  <meta property="og:type" content="article" />
+  <meta property="og:url" content="https://lobovlabs.com/blog/find-website-you-forgot/" />
+  <meta property="og:title" content="How to Find a Website You Visited But Forgot the Name" />
+  <meta property="og:description" content="Why browser history search fails when you forget the title, and how on-device AI lets you find a page by what it was about." />
+  <meta property="og:site_name" content="Lobov Labs" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How do I find a website I visited but forgot the name of?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Open chrome://history and search for any word you remember from the title or address. If you only remember what the page was about, that search will miss it, because Chrome history matches titles and URLs rather than page content. A semantic history extension that indexes the text of pages you read lets you describe the topic and find the page even when you forgot the exact words."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can Chrome history search the content of pages?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. Chrome history only stores the title and URL of each visit, so its search box matches those two fields. It does not index the body text of the pages you visited. To search the actual content you need an extension that captures and indexes page text locally."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How far back does Chrome browsing history go?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Chrome keeps roughly 90 days of browsing history by default, then older entries are removed. If you want long-term recall of what you read, you need a tool that keeps its own index rather than relying on the built-in history window."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is there a private way to search my history by meaning?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. Backtrack runs a small AI model inside your browser and builds the search index on your device. Your browsing never leaves your computer, and the extension works offline after a one-time model download."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <style>
+    :root {
+      --bg:       #0d0d0d;
+      --surface:  #141414;
+      --border:   #222;
+      --muted:    #777;
+      --text:     #c8c8c8;
+      --bright:   #f0f0f0;
+      --accent:   #e8a030;
+      --accent2:  #c06820;
+      --mono:     'IBM Plex Mono', monospace;
+      --sans:     'IBM Plex Sans', sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 16px;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.6;
+    }
+
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2.5rem;
+      height: 56px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(13,13,13,0.85);
+      backdrop-filter: blur(12px);
+    }
+
+    .nav-logo {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--bright);
+      text-decoration: none;
+      letter-spacing: 0.08em;
+      display: flex;
+      align-items: center;
+    }
+
+    .nav-logo .cursor {
+      display: inline-block;
+      width: 8px;
+      height: 14px;
+      background: var(--accent);
+      animation: blink 1.1s step-end infinite;
+      vertical-align: middle;
+      margin-left: 2px;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-decoration: none;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--accent); }
+
+    .page-header {
+      position: relative;
+      z-index: 1;
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 9rem 2.5rem 3rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .breadcrumb {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      margin-bottom: 1.25rem;
+    }
+
+    .breadcrumb a {
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .breadcrumb a:hover { color: var(--text); }
+    .breadcrumb span { color: var(--accent); }
+
+    .page-header h1 {
+      font-family: var(--sans);
+      font-size: clamp(1.5rem, 4vw, 2.2rem);
+      font-weight: 500;
+      color: var(--bright);
+      line-height: 1.3;
+      margin-bottom: 0.75rem;
+    }
+
+    .page-header .meta {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--muted);
+      letter-spacing: 0.06em;
+    }
+
+    .content {
+      position: relative;
+      z-index: 1;
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 3rem 2.5rem 6rem;
+    }
+
+    .content h2 {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--accent);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+      margin-top: 2.5rem;
+    }
+
+    .content h2::before { content: '// '; opacity: 0.5; }
+
+    .content h2:first-child { margin-top: 0; }
+
+    .content h3 {
+      font-family: var(--mono);
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--bright);
+      margin: 1.5rem 0 0.75rem;
+      letter-spacing: 0.03em;
+    }
+
+    .content p {
+      font-size: 0.97rem;
+      color: var(--text);
+      line-height: 1.85;
+      margin-bottom: 1rem;
+    }
+
+    .content p:last-child { margin-bottom: 0; }
+
+    .content a {
+      color: var(--accent);
+      text-decoration: none;
+      border-bottom: 1px solid var(--accent2);
+      transition: border-color 0.2s;
+    }
+
+    .content a:hover { border-color: var(--accent); }
+
+    .content ul {
+      list-style: none;
+      margin: 0.75rem 0 1rem;
+    }
+
+    .content ul li {
+      font-size: 0.97rem;
+      color: var(--text);
+      line-height: 1.8;
+      padding-left: 1.25rem;
+      position: relative;
+      margin-bottom: 0.25rem;
+    }
+
+    .content ul li::before {
+      content: '->';
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+      opacity: 0.6;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+    }
+
+    code {
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      color: var(--accent);
+      background: var(--surface);
+      padding: 0.1em 0.35em;
+    }
+
+    .highlight-box {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      padding: 1.25rem 1.5rem;
+      margin: 1.5rem 0;
+    }
+
+    .highlight-box p {
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      color: var(--text);
+      line-height: 1.7;
+      margin: 0;
+    }
+
+    .highlight-box strong { color: var(--accent); }
+
+    .comparison {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 0.88rem;
+    }
+
+    .comparison th {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      font-weight: 500;
+      color: var(--accent);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      text-align: left;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .comparison td {
+      padding: 0.75rem 1rem;
+      color: var(--text);
+      border-bottom: 1px solid #1a1a1a;
+      vertical-align: top;
+    }
+
+    .comparison tr:last-child td { border-bottom: none; }
+    .comparison td:first-child { font-family: var(--mono); font-size: 0.8rem; color: var(--bright); white-space: nowrap; }
+
+    .check { color: #5dba6e; font-family: var(--mono); }
+    .cross { color: #883030; font-family: var(--mono); }
+    .partial { color: var(--accent); font-family: var(--mono); }
+
+    .cta-box {
+      border: 1px solid var(--accent);
+      background: rgba(232, 160, 48, 0.05);
+      padding: 2rem;
+      margin: 2.5rem 0;
+      text-align: center;
+    }
+
+    .cta-box p {
+      font-size: 0.95rem;
+      color: var(--text);
+      margin-bottom: 1.25rem;
+    }
+
+    .btn-install {
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #0d0d0d !important;
+      background: var(--accent);
+      border: none !important;
+      padding: 0.85rem 2rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.2s;
+      display: inline-block;
+    }
+
+    .btn-install:hover { background: var(--accent2); }
+
+    .faq-item {
+      border-top: 1px solid var(--border);
+      padding: 1.5rem 0;
+    }
+
+    .faq-item:last-child { border-bottom: 1px solid var(--border); }
+
+    .faq-q {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--bright);
+      margin-bottom: 0.75rem;
+    }
+
+    .faq-a {
+      font-size: 0.95rem;
+      color: var(--text);
+      line-height: 1.8;
+    }
+
+    footer {
+      position: relative;
+      z-index: 1;
+      border-top: 1px solid var(--border);
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 2rem 2.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .footer-logo {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 1.5rem;
+      list-style: none;
+    }
+
+    .footer-links a {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-decoration: none;
+      letter-spacing: 0.06em;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover { color: var(--text); }
+
+    @media (max-width: 640px) {
+      nav { padding: 0 1.25rem; }
+      .page-header, .content { padding-left: 1.25rem; padding-right: 1.25rem; }
+      footer { padding: 1.5rem 1.25rem; }
+      .comparison { font-size: 0.8rem; }
+      .comparison th, .comparison td { padding: 0.6rem 0.6rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="/" class="nav-logo">LL<span class="cursor"></span></a>
+    <ul class="nav-links">
+      <li><a href="/products.html">Products</a></li>
+      <li><a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#108;&#111;&#98;&#111;&#118;&#108;&#97;&#98;&#115;&#64;&#112;&#114;&#111;&#116;&#111;&#110;&#46;&#109;&#101;">Contact</a></li>
+    </ul>
+  </nav>
+
+  <header class="page-header">
+    <p class="breadcrumb">
+      <a href="/">lobovlabs.com</a>
+      <span> / blog / </span>
+      <span>find-website-you-forgot</span>
+    </p>
+    <h1>How to Find a Website You Visited But Forgot the Name</h1>
+    <p class="meta">Lobov Labs &nbsp;&middot;&nbsp; May 2026 &nbsp;&middot;&nbsp; 7 min read</p>
+  </header>
+
+  <main class="content">
+
+    <p>You read something last week. An article, a guide, a forum thread. Today you want it back, and all you have is a fuzzy memory of what it was about. You open your history, type a word, and get nothing. The page is somewhere in the thousands you have visited, and you cannot surface it.</p>
+
+    <p>This is one of the most common frustrations of daily browsing. The good news: the page is almost always still findable. The method depends on what you actually remember.</p>
+
+    <h2>Why browser history search misses it</h2>
+
+    <p>Chrome history, and the history in most browsers, stores two things per visit: the page title and the URL. The search box on <code>chrome://history</code> matches against those two fields and nothing else. It never looks at the words that were on the page.</p>
+
+    <p>So history search works when you remember the title or the domain. It fails in the exact case that brings most people here: you remember the idea of the page, a phrase from the middle of it, or roughly what it argued, but not its headline or address. Those words live in the body text, which history never recorded.</p>
+
+    <div class="highlight-box">
+      <p><strong>The core gap:</strong> you remember meaning. Browser history searches titles and URLs. The thing you recall and the thing the search box looks at are different, so it comes up empty.</p>
+    </div>
+
+    <h2>Method 1: search history by what you do remember</h2>
+
+    <p>Start with the built-in history anyway, because it is fast. Open <code>chrome://history</code> (or press the history shortcut) and try:</p>
+
+    <ul>
+      <li>Any distinctive word that was likely in the title, such as a product name, an author, or a place</li>
+      <li>The domain, if you recall roughly where you were, for example a news site or a specific blog</li>
+      <li>The date, by scrolling to the day you think you read it and scanning the titles</li>
+    </ul>
+
+    <p>One limit to keep in mind: Chrome keeps about 90 days of history by default. If you read the page months ago, it may already be gone from the built-in history.</p>
+
+    <h2>Method 2: search Google for a phrase you recall</h2>
+
+    <p>If the page was public and you remember an exact phrase from it, put that phrase in quotes and search Google. Verbatim phrase search is good at surfacing the original source of a quote.</p>
+
+    <p>This breaks down in three situations: the page was behind a login or paywall, the page is not well indexed by Google, or you only remember the gist and not any exact wording. In those cases Google has nothing distinctive to match.</p>
+
+    <h2>Method 3: full-text history extensions</h2>
+
+    <p>Several extensions record the body text of pages you visit so you can later search inside that text. This solves the "I remember a phrase" case that Chrome history cannot. You still need to recall a word or phrase that actually appeared on the page, and a typo or a synonym will throw the search off.</p>
+
+    <h2>Method 4: search by meaning with on-device AI</h2>
+
+    <p>The newest approach indexes your pages by meaning rather than by exact words. Instead of matching characters, it turns each page and your query into a numeric representation of their meaning and ranks pages by how close they are. You can describe the page in your own words and still find it, even when none of those words appeared on the page and even when you make a typo.</p>
+
+    <p>This is how <a href="/products.html">Backtrack</a> works. It quietly indexes the readable text of the pages you read, turns each one into a meaning vector with a small AI model that runs inside your browser, and lets you search later by describing what the page was about. A query like "that article comparing electric cars by range" surfaces the right page even if its title was something unrelated.</p>
+
+    <div class="cta-box">
+      <p>Backtrack is on-device semantic search for the pages you have read. Describe what a page was about and find it again, even when you forgot the title. Free, private, and runs entirely in your browser.</p>
+      <a href="https://chromewebstore.google.com/detail/gbmaaldbomcjifmkgkabmlicodjnlfje" target="_blank" rel="noopener noreferrer" class="btn-install">Install for Chrome - free -&gt;</a>
+    </div>
+
+    <h2>How searching by meaning actually works</h2>
+
+    <p>A small language model converts text into a vector, a list of numbers that captures meaning. Pages about similar topics land near each other in that numeric space, even when they use different words. When you search, your query becomes a vector too, and the tool ranks stored pages by how close their vectors are to it.</p>
+
+    <p>Because the match is on meaning, "how much sleep do I actually need" can find a page titled "The science of rest," and a small spelling mistake barely moves the result. Keyword search cannot do this, because it compares characters.</p>
+
+    <h2>Comparing the approaches</h2>
+
+    <table class="comparison">
+      <thead>
+        <tr>
+          <th>Method</th>
+          <th>Finds by content</th>
+          <th>Finds by meaning</th>
+          <th>Works when logged in</th>
+          <th>Private</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Chrome history</td>
+          <td><span class="cross">no</span></td>
+          <td><span class="cross">no</span></td>
+          <td><span class="check">yes</span></td>
+          <td><span class="check">yes</span></td>
+        </tr>
+        <tr>
+          <td>Google search</td>
+          <td><span class="check">yes</span></td>
+          <td><span class="partial">partial</span></td>
+          <td><span class="cross">no</span></td>
+          <td><span class="cross">no</span></td>
+        </tr>
+        <tr>
+          <td>Full-text extension</td>
+          <td><span class="check">yes</span></td>
+          <td><span class="cross">no</span></td>
+          <td><span class="check">yes</span></td>
+          <td><span class="partial">varies</span></td>
+        </tr>
+        <tr>
+          <td>Backtrack</td>
+          <td><span class="check">yes</span></td>
+          <td><span class="check">yes</span></td>
+          <td><span class="check">yes</span></td>
+          <td><span class="check">yes</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>If you want to stop losing pages</h2>
+
+    <p>Manual tricks recover a page after you have already lost it. To stop losing pages in the first place, keep a searchable record of what you read. A local semantic index does this in the background: every readable article you open gets added, and months later you can still find it by topic. Because the index lives on your device, there is no account and nothing to leak.</p>
+
+    <h2>FAQ</h2>
+
+    <div class="faq-item">
+      <p class="faq-q">How do I find a website I visited but forgot the name of?</p>
+      <p class="faq-a">Search <code>chrome://history</code> for any word you remember from the title or address. If you only remember what the page was about, history search will miss it, because it matches titles and URLs rather than page content. A semantic history tool like <a href="/products.html">Backtrack</a> lets you describe the topic and find the page even when you forgot the exact words.</p>
+    </div>
+
+    <div class="faq-item">
+      <p class="faq-q">Can Chrome history search the content of pages?</p>
+      <p class="faq-a">No. Chrome history stores only the title and URL of each visit, so its search box matches those fields. It does not index the body text. To search the actual content you need an extension that captures and indexes page text locally.</p>
+    </div>
+
+    <div class="faq-item">
+      <p class="faq-q">How far back does Chrome browsing history go?</p>
+      <p class="faq-a">About 90 days by default, then older entries drop off. For long-term recall you need a tool that keeps its own index rather than relying on the built-in history window.</p>
+    </div>
+
+    <div class="faq-item">
+      <p class="faq-q">Is there a private way to search my history by meaning?</p>
+      <p class="faq-a">Yes. Backtrack runs a small AI model inside your browser and builds the index on your device. Your browsing never leaves your computer, and it works offline after a one-time model download.</p>
+    </div>
+
+    <p style="margin-top: 2rem;">Related: <a href="/blog/search-browser-history-by-content/">How to Search Your Browser History by Page Content</a></p>
+
+  </main>
+
+  <footer>
+    <span class="footer-logo">LOBOV LABS &#169; 2026</span>
+    <ul class="footer-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="/products.html">Products</a></li>
+      <li><a href="/blog/search-browser-history-by-content/">Search by content</a></li>
+    </ul>
+  </footer>
+
+</body>
+</html>
