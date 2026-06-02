@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>How to Search Your Browser History by Page Content</title>
+  <meta name="description" content="Chrome history only matches titles and URLs. Here is how to search the full text of pages you visited, the difference between keyword and AI semantic search, and how to keep it private and on-device." />
+  <link rel="canonical" href="https://lobovlabs.com/blog/search-browser-history-by-content/" />
+
+  <meta property="og:type" content="article" />
+  <meta property="og:url" content="https://lobovlabs.com/blog/search-browser-history-by-content/" />
+  <meta property="og:title" content="How to Search Your Browser History by Page Content" />
+  <meta property="og:description" content="How to search the full text of pages you visited, and the difference between keyword search and on-device AI semantic search." />
+  <meta property="og:site_name" content="Lobov Labs" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Can you search browser history by content instead of title?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Not with the built-in browser history, which indexes only titles and URLs. To search the body text of pages you visited you need an extension that captures and indexes that text. Keyword extensions match exact words; semantic extensions match meaning, so they handle synonyms and typos."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is the difference between full-text and semantic history search?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Full-text search matches the exact words you type against the words on the page, so you must remember a phrase that actually appeared. Semantic search compares meaning, so a query like 'remote work productivity tips' can find a page titled 'Staying focused from home' even though the words differ."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is searching browser history content private?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "It depends on the tool. Cloud services upload your history to a server and often require an account. Backtrack keeps everything on your device: it indexes pages locally and runs the AI model in your browser, so your browsing is never uploaded."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does Chrome have AI history search?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Chrome has been testing an AI-powered history search, but it processes data in the cloud and requires signing in with a Google account. A local alternative indexes and searches entirely on your device, with no account and no upload."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <style>
+    :root {
+      --bg:       #0d0d0d;
+      --surface:  #141414;
+      --border:   #222;
+      --muted:    #777;
+      --text:     #c8c8c8;
+      --bright:   #f0f0f0;
+      --accent:   #e8a030;
+      --accent2:  #c06820;
+      --mono:     'IBM Plex Mono', monospace;
+      --sans:     'IBM Plex Sans', sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 16px;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.6;
+    }
+
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2.5rem;
+      height: 56px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(13,13,13,0.85);
+      backdrop-filter: blur(12px);
+    }
+
+    .nav-logo {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--bright);
+      text-decoration: none;
+      letter-spacing: 0.08em;
+      display: flex;
+      align-items: center;
+    }
+
+    .nav-logo .cursor {
+      display: inline-block;
+      width: 8px;
+      height: 14px;
+      background: var(--accent);
+      animation: blink 1.1s step-end infinite;
+      vertical-align: middle;
+      margin-left: 2px;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-decoration: none;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--accent); }
+
+    .page-header {
+      position: relative;
+      z-index: 1;
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 9rem 2.5rem 3rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .breadcrumb {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      margin-bottom: 1.25rem;
+    }
+
+    .breadcrumb a {
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .breadcrumb a:hover { color: var(--text); }
+    .breadcrumb span { color: var(--accent); }
+
+    .page-header h1 {
+      font-family: var(--sans);
+      font-size: clamp(1.5rem, 4vw, 2.2rem);
+      font-weight: 500;
+      color: var(--bright);
+      line-height: 1.3;
+      margin-bottom: 0.75rem;
+    }
+
+    .page-header .meta {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--muted);
+      letter-spacing: 0.06em;
+    }
+
+    .content {
+      position: relative;
+      z-index: 1;
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 3rem 2.5rem 6rem;
+    }
+
+    .content h2 {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--accent);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+      margin-top: 2.5rem;
+    }
+
+    .content h2::before { content: '// '; opacity: 0.5; }
+
+    .content h2:first-child { margin-top: 0; }
+
+    .content h3 {
+      font-family: var(--mono);
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--bright);
+      margin: 1.5rem 0 0.75rem;
+      letter-spacing: 0.03em;
+    }
+
+    .content p {
+      font-size: 0.97rem;
+      color: var(--text);
+      line-height: 1.85;
+      margin-bottom: 1rem;
+    }
+
+    .content p:last-child { margin-bottom: 0; }
+
+    .content a {
+      color: var(--accent);
+      text-decoration: none;
+      border-bottom: 1px solid var(--accent2);
+      transition: border-color 0.2s;
+    }
+
+    .content a:hover { border-color: var(--accent); }
+
+    .content ul {
+      list-style: none;
+      margin: 0.75rem 0 1rem;
+    }
+
+    .content ul li {
+      font-size: 0.97rem;
+      color: var(--text);
+      line-height: 1.8;
+      padding-left: 1.25rem;
+      position: relative;
+      margin-bottom: 0.25rem;
+    }
+
+    .content ul li::before {
+      content: '->';
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+      opacity: 0.6;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+    }
+
+    code {
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      color: var(--accent);
+      background: var(--surface);
+      padding: 0.1em 0.35em;
+    }
+
+    .highlight-box {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      padding: 1.25rem 1.5rem;
+      margin: 1.5rem 0;
+    }
+
+    .highlight-box p {
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      color: var(--text);
+      line-height: 1.7;
+      margin: 0;
+    }
+
+    .highlight-box strong { color: var(--accent); }
+
+    .comparison {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 0.88rem;
+    }
+
+    .comparison th {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      font-weight: 500;
+      color: var(--accent);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      text-align: left;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .comparison td {
+      padding: 0.75rem 1rem;
+      color: var(--text);
+      border-bottom: 1px solid #1a1a1a;
+      vertical-align: top;
+    }
+
+    .comparison tr:last-child td { border-bottom: none; }
+    .comparison td:first-child { font-family: var(--mono); font-size: 0.8rem; color: var(--bright); white-space: nowrap; }
+
+    .check { color: #5dba6e; font-family: var(--mono); }
+    .cross { color: #883030; font-family: var(--mono); }
+    .partial { color: var(--accent); font-family: var(--mono); }
+
+    .cta-box {
+      border: 1px solid var(--accent);
+      background: rgba(232, 160, 48, 0.05);
+      padding: 2rem;
+      margin: 2.5rem 0;
+      text-align: center;
+    }
+
+    .cta-box p {
+      font-size: 0.95rem;
+      color: var(--text);
+      margin-bottom: 1.25rem;
+    }
+
+    .btn-install {
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #0d0d0d !important;
+      background: var(--accent);
+      border: none !important;
+      padding: 0.85rem 2rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.2s;
+      display: inline-block;
+    }
+
+    .btn-install:hover { background: var(--accent2); }
+
+    .faq-item {
+      border-top: 1px solid var(--border);
+      padding: 1.5rem 0;
+    }
+
+    .faq-item:last-child { border-bottom: 1px solid var(--border); }
+
+    .faq-q {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--bright);
+      margin-bottom: 0.75rem;
+    }
+
+    .faq-a {
+      font-size: 0.95rem;
+      color: var(--text);
+      line-height: 1.8;
+    }
+
+    footer {
+      position: relative;
+      z-index: 1;
+      border-top: 1px solid var(--border);
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 2rem 2.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .footer-logo {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 1.5rem;
+      list-style: none;
+    }
+
+    .footer-links a {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-decoration: none;
+      letter-spacing: 0.06em;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover { color: var(--text); }
+
+    @media (max-width: 640px) {
+      nav { padding: 0 1.25rem; }
+      .page-header, .content { padding-left: 1.25rem; padding-right: 1.25rem; }
+      footer { padding: 1.5rem 1.25rem; }
+      .comparison { font-size: 0.8rem; }
+      .comparison th, .comparison td { padding: 0.6rem 0.6rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="/" class="nav-logo">LL<span class="cursor"></span></a>
+    <ul class="nav-links">
+      <li><a href="/products.html">Products</a></li>
+      <li><a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#108;&#111;&#98;&#111;&#118;&#108;&#97;&#98;&#115;&#64;&#112;&#114;&#111;&#116;&#111;&#110;&#46;&#109;&#101;">Contact</a></li>
+    </ul>
+  </nav>
+
+  <header class="page-header">
+    <p class="breadcrumb">
+      <a href="/">lobovlabs.com</a>
+      <span> / blog / </span>
+      <span>search-browser-history-by-content</span>
+    </p>
+    <h1>How to Search Your Browser History by Page Content</h1>
+    <p class="meta">Lobov Labs &nbsp;&middot;&nbsp; May 2026 &nbsp;&middot;&nbsp; 7 min read</p>
+  </header>
+
+  <main class="content">
+
+    <p>You remember a sentence from a page you read, or the point it made, but the title is gone. You search your history and find nothing, because the words you remember were in the body of the page, and browser history does not keep the body of the page. Here is how to search what was actually on the pages you visited, and how the options differ.</p>
+
+    <h2>What browser history actually stores</h2>
+
+    <p>Chrome history keeps the title and the URL of each visit. That is the whole record. The search box on <code>chrome://history</code> matches those two fields, so it can find a page by its headline or its address, and nothing more. The paragraphs you read, the quote you want back, the argument you half-remember: none of it is in the history database.</p>
+
+    <div class="highlight-box">
+      <p><strong>The takeaway:</strong> to search by content you need a tool that captures the page text as you browse and stores its own index. The browser will not do this for you.</p>
+    </div>
+
+    <h2>Option 1: full-text history extensions</h2>
+
+    <p>A full-text extension records the readable text of pages you open and lets you search inside it later. This is a real upgrade over title-only history. You can find a page by a phrase that appeared anywhere on it.</p>
+
+    <p>The catch is that it is still literal matching. You have to remember a word or phrase that was actually on the page. A synonym will not match, and a typo can drop the result. If you remember the idea but not the wording, literal search struggles.</p>
+
+    <h2>Option 2: Google, for public pages only</h2>
+
+    <p>If the page is public and you recall an exact phrase, a quoted Google search can surface it. This does nothing for pages behind a login, internal docs, or anything you only remember by topic. It also searches the whole web rather than the specific set of pages you read.</p>
+
+    <h2>Option 3: semantic search, by meaning</h2>
+
+    <p>Semantic search indexes pages by meaning. It converts each page into a vector, a list of numbers that represents what the page is about, and does the same with your query. It then ranks pages by how close their meaning is to your query, rather than by shared characters.</p>
+
+    <p>That changes what you can type. A query like "remote work productivity tips" can find a page titled "Staying focused from home" that never used the word "productivity." Typos barely matter, because the meaning of the query stays close even with a misspelled word. This is the gap that literal full-text search cannot cross.</p>
+
+    <h3>Keyword vs semantic, in one line</h3>
+
+    <p>Keyword search asks "which page contains these words." Semantic search asks "which page is about this." When you remember the idea and not the wording, the second question is the one you need answered.</p>
+
+    <h2>The privacy question: local vs cloud</h2>
+
+    <p>Searching your history by content means a tool is reading everything you browse. Where that reading happens matters.</p>
+
+    <p>Cloud services send your page text or your history to a server, usually behind an account login. Chrome has been testing an AI history search that processes data in the cloud and requires a Google sign-in. That works, but your reading leaves your machine.</p>
+
+    <p>The local alternative keeps everything on your device. <a href="/products.html">Backtrack</a> runs a small AI model inside your browser, indexes pages on your machine, and stores the index in your browser. Your browsing is never uploaded, there is no account, and it keeps working offline after a one-time model download.</p>
+
+    <div class="cta-box">
+      <p>Backtrack searches the pages you have read by meaning, entirely on your device. No account, no cloud, no upload. Free on the Chrome Web Store.</p>
+      <a href="https://chromewebstore.google.com/detail/gbmaaldbomcjifmkgkabmlicodjnlfje" target="_blank" rel="noopener noreferrer" class="btn-install">Install for Chrome - free -&gt;</a>
+    </div>
+
+    <h2>How on-device indexing works</h2>
+
+    <p>When you open a readable article, the extension extracts the main text, splits it into short passages, and turns each passage into a meaning vector with a small model that runs in the browser through WebAssembly. The vectors and their text are stored locally. A search turns your query into a vector the same way and compares it against the stored passages. All of it happens on your computer.</p>
+
+    <h2>Comparing the options</h2>
+
+    <table class="comparison">
+      <thead>
+        <tr>
+          <th>Tool</th>
+          <th>Searches content</th>
+          <th>By meaning</th>
+          <th>Local / private</th>
+          <th>No account</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Chrome history</td>
+          <td><span class="cross">no</span></td>
+          <td><span class="cross">no</span></td>
+          <td><span class="check">yes</span></td>
+          <td><span class="check">yes</span></td>
+        </tr>
+        <tr>
+          <td>Full-text extension</td>
+          <td><span class="check">yes</span></td>
+          <td><span class="cross">no</span></td>
+          <td><span class="partial">varies</span></td>
+          <td><span class="check">yes</span></td>
+        </tr>
+        <tr>
+          <td>Chrome AI history (cloud)</td>
+          <td><span class="check">yes</span></td>
+          <td><span class="check">yes</span></td>
+          <td><span class="cross">no</span></td>
+          <td><span class="cross">no</span></td>
+        </tr>
+        <tr>
+          <td>Backtrack</td>
+          <td><span class="check">yes</span></td>
+          <td><span class="check">yes</span></td>
+          <td><span class="check">yes</span></td>
+          <td><span class="check">yes</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Which one should you use</h2>
+
+    <p>If you usually remember an exact phrase and the page was public, a quoted Google search is the quickest. If you remember a phrase but the page was private, a full-text extension covers it. If you remember the topic but not the words, or you care about keeping your browsing on your own machine, semantic on-device search is the option that fits.</p>
+
+    <h2>FAQ</h2>
+
+    <div class="faq-item">
+      <p class="faq-q">Can you search browser history by content instead of title?</p>
+      <p class="faq-a">The built-in history indexes only titles and URLs, so on its own it cannot. To search the body text you need an extension that captures and indexes page text. Keyword tools match exact words; semantic tools like <a href="/products.html">Backtrack</a> match meaning, so they handle synonyms and typos.</p>
+    </div>
+
+    <div class="faq-item">
+      <p class="faq-q">What is the difference between full-text and semantic history search?</p>
+      <p class="faq-a">Full-text matches the exact words you type against the words on the page, so you must remember a phrase that appeared. Semantic search compares meaning, so "remote work productivity tips" can find a page titled "Staying focused from home" even though the words differ.</p>
+    </div>
+
+    <div class="faq-item">
+      <p class="faq-q">Is searching browser history content private?</p>
+      <p class="faq-a">It depends on the tool. Cloud services upload your history to a server and often require an account. Backtrack keeps everything on your device, indexing pages locally and running the model in your browser, so your browsing is never uploaded.</p>
+    </div>
+
+    <div class="faq-item">
+      <p class="faq-q">Does Chrome have AI history search?</p>
+      <p class="faq-a">Chrome has been testing AI history search, but it processes data in the cloud and requires a Google account. A local alternative indexes and searches entirely on your device, with no account and no upload.</p>
+    </div>
+
+    <p style="margin-top: 2rem;">Related: <a href="/blog/find-website-you-forgot/">How to Find a Website You Visited But Forgot the Name</a></p>
+
+  </main>
+
+  <footer>
+    <span class="footer-logo">LOBOV LABS &#169; 2026</span>
+    <ul class="footer-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="/products.html">Products</a></li>
+      <li><a href="/blog/find-website-you-forgot/">Find a forgotten site</a></li>
+    </ul>
+  </footer>
+
+</body>
+</html>
