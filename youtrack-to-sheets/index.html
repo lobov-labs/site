@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YouTrack to Google Sheets - Export Issues in One Click</title>
+  <meta name="description" content="Export YouTrack issues to Google Sheets with one click. Captures ID, title, status, priority, author, assignee, and dates. Works with any YouTrack instance, no API tokens or scripts." />
+  <link rel="canonical" href="https://lobovlabs.com/youtrack-to-sheets/" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://lobovlabs.com/youtrack-to-sheets/" />
+  <meta property="og:title" content="YouTrack to Google Sheets - Export Issues in One Click" />
+  <meta property="og:description" content="Export YouTrack issues to a Google Spreadsheet in one click. Works with YouTrack Cloud, JetBrains-hosted, and self-hosted instances." />
+  <meta property="og:site_name" content="Lobov Labs" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "YouTrack to Google Sheets",
+    "applicationCategory": "BrowserApplication",
+    "operatingSystem": "Chrome",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "url": "https://chromewebstore.google.com/detail/hmmieajlpegpelfiephalokbbfbjomkc",
+    "description": "Export YouTrack issues to Google Sheets with one click. Captures issue ID, title, status, priority, author, assignee, and dates. Works with any YouTrack instance.",
+    "publisher": {
+      "@type": "Organization",
+      "name": "Lobov Labs",
+      "url": "https://lobovlabs.com"
+    }
+  }
+  </script>
+
+  <style>
+    :root {
+      --bg:       #0d0d0d;
+      --surface:  #141414;
+      --surface2: #191919;
+      --border:   #222;
+      --muted:    #777;
+      --text:     #c8c8c8;
+      --bright:   #f0f0f0;
+      --accent:   #e8a030;
+      --accent2:  #c06820;
+      --mono:     'IBM Plex Mono', monospace;
+      --sans:     'IBM Plex Sans', sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 16px;
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.6;
+    }
+
+    /* Nav */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2.5rem;
+      height: 56px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(13,13,13,0.85);
+      backdrop-filter: blur(12px);
+    }
+
+    .nav-logo {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--bright);
+      text-decoration: none;
+      letter-spacing: 0.08em;
+      display: flex;
+      align-items: center;
+    }
+
+    .nav-logo .cursor {
+      display: inline-block;
+      width: 8px;
+      height: 14px;
+      background: var(--accent);
+      animation: blink 1.1s step-end infinite;
+      vertical-align: middle;
+      margin-left: 2px;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-decoration: none;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--accent); }
+
+    /* Layout */
+    .wrap {
+      position: relative;
+      z-index: 1;
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 0 2.5rem;
+    }
+
+    /* Hero */
+    .hero {
+      padding: 9rem 0 5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .hero-badge {
+      display: inline-block;
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #5dba6e;
+      border: 1px solid #2a4a30;
+      background: #0d1f11;
+      padding: 0.2rem 0.6rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero h1 {
+      font-family: var(--mono);
+      font-size: clamp(1.8rem, 5vw, 3.2rem);
+      font-weight: 600;
+      color: var(--bright);
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      margin-bottom: 1.25rem;
+    }
+
+    .hero h1 span { color: var(--accent); }
+
+    .hero-sub {
+      font-size: 1.05rem;
+      color: var(--text);
+      max-width: 580px;
+      line-height: 1.8;
+      margin-bottom: 2rem;
+      font-weight: 300;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 3rem;
+    }
+
+    .btn-install {
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--bg);
+      background: var(--accent);
+      border: none;
+      padding: 0.85rem 2rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.2s, transform 0.15s;
+      display: inline-block;
+    }
+
+    .btn-install:hover {
+      background: var(--accent2);
+      transform: translateY(-1px);
+    }
+
+    .btn-ghost {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text);
+      background: transparent;
+      border: 1px solid #555;
+      padding: 0.85rem 1.75rem;
+      text-decoration: none;
+      transition: border-color 0.2s, color 0.2s;
+      display: inline-block;
+    }
+
+    .btn-ghost:hover { border-color: var(--text); color: var(--bright); }
+
+    .hero-meta {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--muted);
+      letter-spacing: 0.06em;
+    }
+
+    /* Section */
+    .section {
+      padding: 4rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section:last-of-type { border-bottom: none; }
+
+    .section-label {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      font-weight: 500;
+      color: var(--accent);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+    }
+
+    .section-label::before { content: '// '; opacity: 0.5; }
+
+    .section h2 {
+      font-family: var(--mono);
+      font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+      font-weight: 600;
+      color: var(--bright);
+      letter-spacing: -0.01em;
+      margin-bottom: 1.25rem;
+    }
+
+    .section p {
+      font-size: 0.97rem;
+      line-height: 1.85;
+      color: var(--text);
+      margin-bottom: 1rem;
+      max-width: 680px;
+    }
+
+    .section p:last-child { margin-bottom: 0; }
+
+    .section a {
+      color: var(--accent);
+      text-decoration: none;
+      border-bottom: 1px solid var(--accent2);
+      transition: border-color 0.2s;
+    }
+
+    .section a:hover { border-color: var(--accent); }
+
+    /* Features grid */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      margin-top: 2rem;
+    }
+
+    .feature {
+      background: var(--bg);
+      padding: 1.75rem 1.75rem;
+      transition: background 0.2s;
+    }
+
+    .feature:hover { background: var(--surface); }
+
+    .feature-title {
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--bright);
+      letter-spacing: 0.04em;
+      margin-bottom: 0.5rem;
+    }
+
+    .feature-title::before {
+      content: '+ ';
+      color: var(--accent);
+      opacity: 0.7;
+    }
+
+    .feature p {
+      font-size: 0.88rem;
+      color: var(--muted);
+      line-height: 1.7;
+      margin: 0;
+      max-width: none;
+    }
+
+    /* Flow chain */
+    .audio-chain {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: var(--muted);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      line-height: 2;
+      overflow-x: auto;
+    }
+
+    .audio-chain .node {
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    .chain-row {
+      display: flex;
+      align-items: baseline;
+      gap: 1rem;
+    }
+
+    .chain-arrow {
+      color: #444;
+      padding-left: 0.25rem;
+      line-height: 1.4;
+    }
+
+    .chain-comment {
+      color: #777;
+      font-size: 0.72rem;
+    }
+
+    .tech-detail {
+      background: var(--surface);
+      border-left: 2px solid var(--accent);
+      padding: 1rem 1.25rem;
+      margin: 1rem 0;
+      font-size: 0.9rem;
+      line-height: 1.8;
+    }
+
+    .tech-detail strong {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      color: var(--bright);
+    }
+
+    code {
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      color: var(--accent);
+      background: var(--surface);
+      padding: 0.1em 0.35em;
+    }
+
+    /* Columns captured */
+    .sites-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .site-tag {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 0.3rem 0.7rem;
+      letter-spacing: 0.04em;
+    }
+
+    /* FAQ */
+    .faq-item {
+      border-top: 1px solid var(--border);
+      padding: 1.5rem 0;
+    }
+
+    .faq-item:last-child { border-bottom: 1px solid var(--border); }
+
+    .faq-q {
+      font-family: var(--mono);
+      font-size: 0.88rem;
+      font-weight: 500;
+      color: var(--bright);
+      margin-bottom: 0.75rem;
+      letter-spacing: 0.02em;
+    }
+
+    .faq-a {
+      font-size: 0.95rem;
+      color: var(--text);
+      line-height: 1.8;
+    }
+
+    /* Privacy strip */
+    .privacy-strip {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .privacy-icon {
+      font-family: var(--mono);
+      font-size: 1.2rem;
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .privacy-strip p {
+      font-size: 0.88rem;
+      color: var(--muted);
+      margin: 0;
+      max-width: none;
+    }
+
+    /* Bottom CTA */
+    .cta-bottom {
+      padding: 5rem 0;
+      text-align: center;
+    }
+
+    .cta-bottom h2 {
+      font-family: var(--mono);
+      font-size: clamp(1.2rem, 3vw, 1.8rem);
+      font-weight: 600;
+      color: var(--bright);
+      margin-bottom: 1rem;
+      letter-spacing: -0.01em;
+    }
+
+    .cta-bottom p {
+      font-size: 0.95rem;
+      color: var(--muted);
+      margin-bottom: 2rem;
+      max-width: none;
+    }
+
+    /* Footer */
+    footer {
+      position: relative;
+      z-index: 1;
+      border-top: 1px solid var(--border);
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 2rem 2.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .footer-logo {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 1.5rem;
+      list-style: none;
+    }
+
+    .footer-links a {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-decoration: none;
+      letter-spacing: 0.06em;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover { color: var(--text); }
+
+    @media (max-width: 640px) {
+      nav { padding: 0 1.25rem; }
+      .wrap { padding: 0 1.25rem; }
+      .features-grid { grid-template-columns: 1fr; }
+      footer { padding: 1.5rem 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="/" class="nav-logo">LL<span class="cursor"></span></a>
+    <ul class="nav-links">
+      <li><a href="/products.html">Products</a></li>
+      <li><a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#108;&#111;&#98;&#111;&#118;&#108;&#97;&#98;&#115;&#64;&#112;&#114;&#111;&#116;&#111;&#110;&#46;&#109;&#101;">Contact</a></li>
+    </ul>
+  </nav>
+
+  <!-- Hero -->
+  <div class="wrap">
+    <section class="hero">
+      <div class="hero-badge">Live on Chrome Web Store</div>
+      <h1><span>YouTrack &#8594; Google Sheets</span><br />Export issues in one click</h1>
+      <p class="hero-sub">Send YouTrack issues straight to a Google Spreadsheet from your browser. The extension reads the issue fields already on the page and writes them to the sheet you pick. No API tokens, no setup scripts, no copy-paste.</p>
+      <div class="hero-actions">
+        <a
+          href="https://chromewebstore.google.com/detail/hmmieajlpegpelfiephalokbbfbjomkc"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="btn-install"
+        >Install for free -&gt;</a>
+        <a href="#how-it-works" class="btn-ghost">How it works</a>
+      </div>
+      <p class="hero-meta">Free. Google OAuth 2.0. Works with any YouTrack instance.</p>
+    </section>
+
+    <!-- What it does -->
+    <section class="section">
+      <p class="section-label">What it does</p>
+      <h2>From YouTrack issue to spreadsheet row</h2>
+      <p>Tracking issues in YouTrack is one thing. Reporting on them in a spreadsheet is another, and that usually means exporting CSV files, fixing columns, or wiring up the YouTrack REST API by hand. This extension removes that step. Open an issue or an issues list in YouTrack, click the extension, and the rows land in your Google Sheet.</p>
+      <p>Each export captures the issue ID, title, status, priority, author, assignee, and the creation and update dates. The extension also writes an &#8220;Added by&#8221; column with the Google account that ran the export, so a team sharing one sheet can see who pulled each issue.</p>
+      <p>The whole thing runs in your browser. Issue data goes from the YouTrack page to the Google Sheets API and nowhere else. There is no Lobov Labs server in the middle, no account to create, and no data stored outside your browser apart from the OAuth token and the last spreadsheet ID.</p>
+    </section>
+
+    <!-- Features -->
+    <section class="section">
+      <p class="section-label">Features</p>
+      <h2>What you get</h2>
+      <div class="features-grid">
+        <div class="feature">
+          <p class="feature-title">One-click export</p>
+          <p>Click the extension on any YouTrack issue or issues list and the rows append to your chosen spreadsheet within a second or two.</p>
+        </div>
+        <div class="feature">
+          <p class="feature-title">Eight fields per issue</p>
+          <p>ID, title, status, priority, author, assignee, created date, and updated date land in separate columns, ready to sort and filter.</p>
+        </div>
+        <div class="feature">
+          <p class="feature-title">Status sync</p>
+          <p>The &#8220;Update statuses&#8221; action re-reads the current status of issues already in the sheet, so a report you exported last week reflects today&#8217;s board.</p>
+        </div>
+        <div class="feature">
+          <p class="feature-title">Any YouTrack instance</p>
+          <p>YouTrack Cloud, JetBrains-hosted, and self-hosted servers all work. Self-hosted domains are granted per site, only when you use them.</p>
+        </div>
+        <div class="feature">
+          <p class="feature-title">Google OAuth 2.0</p>
+          <p>Sign in with your Google account. The extension uses the <code>drive.file</code> and <code>spreadsheets</code> scopes, so it touches only the sheet you select.</p>
+        </div>
+        <div class="feature">
+          <p class="feature-title">Custom project keys</p>
+          <p>Point it at any project prefix. The content script reads whatever issue keys your YouTrack uses, with no hardcoded project list.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- How it works -->
+    <section class="section" id="how-it-works">
+      <p class="section-label">How it works</p>
+      <h2>The export path, explained</h2>
+
+      <p>The extension injects a content script into your open YouTrack tab. That script reads the issue fields rendered on the page, hands them to the extension, and the extension writes them into your spreadsheet through the Google Sheets API. Everything below happens inside Chrome.</p>
+
+      <div class="audio-chain">
+        <div class="chain-row"><span class="node">YouTrack page</span> <span class="chain-comment">// issue or issues list</span></div>
+        <div class="chain-arrow">&#8595;</div>
+        <div class="chain-row"><span class="node">Content script</span> <span class="chain-comment">// reads ID, title, status, priority, author, assignee, dates</span></div>
+        <div class="chain-arrow">&#8595;</div>
+        <div class="chain-row"><span class="node">Google OAuth 2.0</span> <span class="chain-comment">// chrome.identity, token cached locally</span></div>
+        <div class="chain-arrow">&#8595;</div>
+        <div class="chain-row"><span class="node">Google Sheets API</span> <span class="chain-comment">// appends rows to your selected sheet</span></div>
+        <div class="chain-arrow">&#8595;</div>
+        <div class="chain-row"><span class="node">Your spreadsheet</span></div>
+      </div>
+
+      <div class="tech-detail">
+        <strong>Reading the issue</strong><br />
+        A content script runs on the YouTrack tab and pulls the fields straight from the rendered page, so it works with the projects and custom keys your instance already uses. For the status sync it calls your YouTrack REST API using the session you are already signed in with, so there is no separate token to configure.
+      </div>
+
+      <div class="tech-detail">
+        <strong>Authorizing Google</strong><br />
+        Sign-in goes through Google OAuth 2.0 via <code>chrome.identity</code>. The extension requests <code>drive.file</code> to create a new spreadsheet when you want one, and <code>spreadsheets</code> to write into a sheet that already exists or was shared with you. The token lives in <code>chrome.storage.local</code> and never reaches a Lobov Labs server.
+      </div>
+
+      <div class="tech-detail">
+        <strong>Writing the rows</strong><br />
+        Issue data is appended to the spreadsheet you selected. The last-used spreadsheet ID is saved locally so you do not re-enter it every time. The &#8220;Added by&#8221; column records the Google email that ran the export and is written only to that sheet.
+      </div>
+
+      <p>You can revoke the extension&#8217;s Google access at any time at <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener">myaccount.google.com/permissions</a>, and uninstalling removes the locally stored token and spreadsheet ID.</p>
+    </section>
+
+    <!-- Status sync -->
+    <section class="section">
+      <p class="section-label">Status sync</p>
+      <h2>Keep the report current without re-exporting</h2>
+      <p>A spreadsheet of issues goes stale the moment someone moves a card on the board. Re-exporting everything to fix that is wasteful, so the extension handles it with a dedicated action. Click &#8220;Update statuses&#8221; and it walks the issues already in your sheet, reads their current status from your YouTrack instance, and rewrites just the status column.</p>
+      <p>The sync uses your existing signed-in YouTrack session through the REST API, so there is nothing extra to authorize. Issue IDs already in the sheet are matched to live data, and only the status cells change. Titles, assignees, dates, and anything you added by hand stay untouched.</p>
+      <p>This turns a one-time export into a living report. Export your sprint backlog once, then run the sync whenever you need a fresh snapshot for a standup or a stakeholder update.</p>
+    </section>
+
+    <!-- What gets captured -->
+    <section class="section">
+      <p class="section-label">Columns</p>
+      <h2>What lands in the sheet</h2>
+      <p>Every exported issue fills one row with these columns. Sort by status, filter by assignee, or pivot on priority the same way you would with any spreadsheet data.</p>
+
+      <div class="sites-list">
+        <span class="site-tag">Issue ID</span>
+        <span class="site-tag">Title</span>
+        <span class="site-tag">Status</span>
+        <span class="site-tag">Priority</span>
+        <span class="site-tag">Author</span>
+        <span class="site-tag">Assignee</span>
+        <span class="site-tag">Created</span>
+        <span class="site-tag">Updated</span>
+        <span class="site-tag">Added by</span>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="section">
+      <p class="section-label">FAQ</p>
+      <h2>Common questions</h2>
+
+      <div class="faq-item">
+        <p class="faq-q">Does it work with self-hosted YouTrack?</p>
+        <p class="faq-a">Yes. YouTrack Cloud and JetBrains-hosted instances are supported out of the box. For a self-hosted server on your own domain, Chrome asks for access to that site the first time you use the extension there, and that access is used only to read issue data.</p>
+      </div>
+
+      <div class="faq-item">
+        <p class="faq-q">Do I need an API token or admin rights?</p>
+        <p class="faq-a">No. The extension reads the issue fields from the page you already have open, using your existing signed-in YouTrack session. There is no token to generate and no script to install on the YouTrack side.</p>
+      </div>
+
+      <div class="faq-item">
+        <p class="faq-q">Can it write to an existing spreadsheet?</p>
+        <p class="faq-a">Yes. It can append to a sheet you already have, including one shared with you by a teammate, or create a new spreadsheet for you. The <code>spreadsheets</code> and <code>drive.file</code> scopes limit access to the file you pick.</p>
+      </div>
+
+      <div class="faq-item">
+        <p class="faq-q">Is my data sent to your servers?</p>
+        <p class="faq-a">No. Issue data travels from the YouTrack page to the Google Sheets API and nowhere else. Lobov Labs operates no server in this flow. The only things stored locally are your OAuth token and the last spreadsheet ID. Read the full <a href="/youtrack-to-sheets/privacy.html">privacy policy</a>.</p>
+      </div>
+
+      <div class="faq-item">
+        <p class="faq-q">How does the status sync work?</p>
+        <p class="faq-a">The &#8220;Update statuses&#8221; action looks at the issues already listed in your sheet and re-reads their current status from your YouTrack instance through its REST API, using your browser session. A report exported earlier then matches the current state of the board.</p>
+      </div>
+
+      <div class="faq-item">
+        <p class="faq-q">Which interface languages are supported?</p>
+        <p class="faq-a">The extension popup is available in English and Russian.</p>
+      </div>
+    </section>
+
+    <!-- Privacy strip -->
+    <div class="privacy-strip">
+      <span class="privacy-icon">&#9632;</span>
+      <p>No Lobov Labs servers. No analytics. OAuth token stays in your browser. Access is limited to the sheet you choose. <a href="/youtrack-to-sheets/privacy.html">Read the privacy policy</a></p>
+    </div>
+
+    <!-- Bottom CTA -->
+    <div class="cta-bottom">
+      <h2>Export your first issue in seconds</h2>
+      <p>Free to install. Pick a sheet, click the extension, and the rows are there.</p>
+      <a
+        href="https://chromewebstore.google.com/detail/hmmieajlpegpelfiephalokbbfbjomkc"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="btn-install"
+      >Install for free -&gt;</a>
+    </div>
+  </div>
+
+  <footer>
+    <span class="footer-logo">LOBOV LABS &#169; 2026</span>
+    <ul class="footer-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="/products.html">Products</a></li>
+      <li><a href="/youtrack-to-sheets/privacy.html">Privacy</a></li>
+      <li><a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#108;&#111;&#98;&#111;&#118;&#108;&#97;&#98;&#115;&#64;&#112;&#114;&#111;&#116;&#111;&#110;&#46;&#109;&#101;">&#108;&#111;&#98;&#111;&#118;&#108;&#97;&#98;&#115;&#64;&#112;&#114;&#111;&#116;&#111;&#110;&#46;&#109;&#101;</a></li>
+    </ul>
+  </footer>
+
+</body>
+</html>
