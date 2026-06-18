@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mac Click - Learn Mac Keyboard Shortcuts</title>
+  <meta name="description" content="Mac Click teaches Mac keyboard shortcuts on a visual keyboard. See which keys to press, practice them, and learn the Windows to Mac mapping. Free, runs in your browser, no data collected." />
+  <link rel="canonical" href="https://lobovlabs.com/mac-click/" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://lobovlabs.com/mac-click/" />
+  <meta property="og:title" content="Mac Click - Learn Mac Keyboard Shortcuts" />
+  <meta property="og:description" content="Learn Mac keyboard shortcuts on a visual keyboard. See the keys, practice them, and connect each one to the Windows shortcut you already know." />
+  <meta property="og:site_name" content="Lobov Labs" />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Mac Click",
+    "applicationCategory": "EducationalApplication",
+    "operatingSystem": "Chrome",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "url": "https://lobovlabs.com/mac-click/",
+    "description": "Mac Click teaches Mac keyboard shortcuts on a visual keyboard. See which keys to press, practice them, and learn the Windows to Mac mapping. Runs in your browser, nothing is uploaded.",
+    "publisher": {
+      "@type": "Organization",
+      "name": "Lobov Labs",
+      "url": "https://lobovlabs.com"
+    }
+  }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg:       #0d0d0d;
+      --surface:  #141414;
+      --surface2: #191919;
+      --border:   #222;
+      --muted:    #777;
+      --text:     #c8c8c8;
+      --bright:   #f0f0f0;
+      --accent:   #e8a030;
+      --accent2:  #c06820;
+      --mono:     'IBM Plex Mono', monospace;
+      --sans:     'IBM Plex Sans', sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 16px;
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.6;
+    }
+
+    /* Nav */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2.5rem;
+      height: 56px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(13,13,13,0.85);
+      backdrop-filter: blur(12px);
+    }
+
+    .nav-logo {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--bright);
+      text-decoration: none;
+      letter-spacing: 0.08em;
+      display: flex;
+      align-items: center;
+    }
+
+    .nav-logo .cursor {
+      display: inline-block;
+      width: 8px;
+      height: 14px;
+      background: var(--accent);
+      animation: blink 1.1s step-end infinite;
+      vertical-align: middle;
+      margin-left: 2px;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-decoration: none;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--accent); }
+
+    /* Layout */
+    .wrap {
+      position: relative;
+      z-index: 1;
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 0 2.5rem;
+    }
+
+    /* Hero */
+    .hero {
+      padding: 9rem 0 5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .hero-badge {
+      display: inline-block;
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      border: 1px solid #4a3010;
+      background: #1f1508;
+      padding: 0.2rem 0.6rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero h1 {
+      font-family: var(--mono);
+      font-size: clamp(1.8rem, 5vw, 3.2rem);
+      font-weight: 600;
+      color: var(--bright);
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      margin-bottom: 1.25rem;
+    }
+
+    .hero h1 span { color: var(--accent); }
+
+    .hero-sub {
+      font-size: 1.05rem;
+      color: var(--text);
+      max-width: 600px;
+      line-height: 1.8;
+      margin-bottom: 2rem;
+      font-weight: 300;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 3rem;
+    }
+
+    .btn-install {
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--bg);
+      background: var(--accent);
+      border: none;
+      padding: 0.85rem 2rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.2s, transform 0.15s;
+      display: inline-block;
+    }
+
+    .btn-install:hover {
+      background: var(--accent2);
+      transform: translateY(-1px);
+    }
+
+    .btn-soon {
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      background: #1a1a1a;
+      border: 1px solid var(--border);
+      padding: 0.85rem 2rem;
+      text-decoration: none;
+      display: inline-block;
+      cursor: default;
+    }
+
+    .btn-ghost {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text);
+      background: transparent;
+      border: 1px solid #555;
+      padding: 0.85rem 1.75rem;
+      text-decoration: none;
+      transition: border-color 0.2s, color 0.2s;
+      display: inline-block;
+    }
+
+    .btn-ghost:hover { border-color: var(--text); color: var(--bright); }
+
+    .hero-meta {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--muted);
+      letter-spacing: 0.06em;
+    }
+
+    /* Section */
+    .section {
+      padding: 4rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section:last-of-type { border-bottom: none; }
+
+    .section-label {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      font-weight: 500;
+      color: var(--accent);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+    }
+
+    .section-label::before { content: '// '; opacity: 0.5; }
+
+    .section h2 {
+      font-family: var(--mono);
+      font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+      font-weight: 600;
+      color: var(--bright);
+      letter-spacing: -0.01em;
+      margin-bottom: 1.25rem;
+    }
+
+    .section p {
+      font-size: 0.97rem;
+      line-height: 1.85;
+      color: var(--text);
+      margin-bottom: 1rem;
+      max-width: 680px;
+    }
+
+    .section p:last-child { margin-bottom: 0; }
+
+    .section a {
+      color: var(--accent);
+      text-decoration: none;
+      border-bottom: 1px solid var(--accent2);
+      transition: border-color 0.2s;
+    }
+
+    .section a:hover { border-color: var(--accent); }
+
+    /* Features grid */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      margin-top: 2rem;
+    }
+
+    .feature {
+      background: var(--bg);
+      padding: 1.75rem 1.75rem;
+      transition: background 0.2s;
+    }
+
+    .feature:hover { background: var(--surface); }
+
+    .feature-title {
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--bright);
+      letter-spacing: 0.04em;
+      margin-bottom: 0.5rem;
+    }
+
+    .feature-title::before {
+      content: '+ ';
+      color: var(--accent);
+      opacity: 0.7;
+    }
+
+    .feature p {
+      font-size: 0.88rem;
+      color: var(--muted);
+      line-height: 1.7;
+      margin: 0;
+      max-width: none;
+    }
+
+    /* Flow chain */
+    .audio-chain {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: var(--muted);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      line-height: 2;
+      overflow-x: auto;
+    }
+
+    .audio-chain .node {
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    .chain-row {
+      display: flex;
+      align-items: baseline;
+      gap: 1rem;
+    }
+
+    .chain-arrow {
+      color: #444;
+      padding-left: 0.25rem;
+      line-height: 1.4;
+    }
+
+    .chain-comment {
+      color: #777;
+      font-size: 0.72rem;
+    }
+
+    .tech-detail {
+      background: var(--surface);
+      border-left: 2px solid var(--accent);
+      padding: 1rem 1.25rem;
+      margin: 1rem 0;
+      font-size: 0.9rem;
+      line-height: 1.8;
+    }
+
+    .tech-detail strong {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      color: var(--bright);
+    }
+
+    code {
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      color: var(--accent);
+      background: var(--surface);
+      padding: 0.1em 0.35em;
+    }
+
+    /* Tag list */
+    .sites-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .site-tag {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 0.3rem 0.7rem;
+      letter-spacing: 0.04em;
+    }
+
+    /* FAQ */
+    .faq-item {
+      border-top: 1px solid var(--border);
+      padding: 1.5rem 0;
+    }
+
+    .faq-item:last-child { border-bottom: 1px solid var(--border); }
+
+    .faq-q {
+      font-family: var(--mono);
+      font-size: 0.88rem;
+      font-weight: 500;
+      color: var(--bright);
+      margin-bottom: 0.75rem;
+      letter-spacing: 0.02em;
+    }
+
+    .faq-a {
+      font-size: 0.95rem;
+      color: var(--text);
+      line-height: 1.8;
+    }
+
+    /* Privacy strip */
+    .privacy-strip {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .privacy-icon {
+      font-family: var(--mono);
+      font-size: 1.2rem;
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .privacy-strip p {
+      font-size: 0.88rem;
+      color: var(--muted);
+      margin: 0;
+      max-width: none;
+    }
+
+    /* Bottom CTA */
+    .cta-bottom {
+      padding: 5rem 0;
+      text-align: center;
+    }
+
+    .cta-bottom h2 {
+      font-family: var(--mono);
+      font-size: clamp(1.2rem, 3vw, 1.8rem);
+      font-weight: 600;
+      color: var(--bright);
+      margin-bottom: 1rem;
+      letter-spacing: -0.01em;
+    }
+
+    .cta-bottom p {
+      font-size: 0.95rem;
+      color: var(--muted);
+      margin-bottom: 2rem;
+      max-width: none;
+    }
+
+    /* Footer */
+    footer {
+      position: relative;
+      z-index: 1;
+      border-top: 1px solid var(--border);
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 2rem 2.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .footer-logo {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 1.5rem;
+      list-style: none;
+    }
+
+    .footer-links a {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-decoration: none;
+      letter-spacing: 0.06em;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover { color: var(--text); }
+
+    @media (max-width: 640px) {
+      nav { padding: 0 1.25rem; }
+      .wrap { padding: 0 1.25rem; }
+      .features-grid { grid-template-columns: 1fr; }
+      footer { padding: 1.5rem 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="/" class="nav-logo">LL<span class="cursor"></span></a>
+    <ul class="nav-links">
+      <li><a href="/products.html">Products</a></li>
+      <li><a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#108;&#111;&#98;&#111;&#118;&#108;&#97;&#98;&#115;&#64;&#112;&#114;&#111;&#116;&#111;&#110;&#46;&#109;&#101;">Contact</a></li>
+    </ul>
+  </nav>
+
+  <!-- Hero -->
+  <div class="wrap">
+    <section class="hero">
+      <div class="hero-badge">Coming soon to Chrome Web Store</div>
+      <h1><span>Mac Click</span><br />Learn Mac keyboard shortcuts</h1>
+      <p class="hero-sub">You moved to a Mac and the muscle memory from Windows keeps landing on the wrong key. Mac Click shows the shortcut for any common action on a picture of the keyboard, lights up the keys to press, and lets you drill them until they feel natural.</p>
+      <div class="hero-actions">
+        <!-- When the extension is live, replace the span below with:
+        <a href="STORE_URL" target="_blank" rel="noopener noreferrer" class="btn-install">Install for free -&gt;</a> -->
+        <span class="btn-soon">Coming soon</span>
+        <a href="#how-it-works" class="btn-ghost">How it works</a>
+      </div>
+      <p class="hero-meta">Free. Works offline. No account. No data collected.</p>
+    </section>
+
+    <!-- What it does -->
+    <section class="section">
+      <p class="section-label">What it does</p>
+      <h2>See the keys, then make them stick</h2>
+      <p>Switching from Windows to a Mac means relearning shortcuts you used without thinking. Ctrl becomes Command, and half of your reflexes hit the wrong key. Mac Click closes that gap. Pick an action like copy, reopen a closed tab, or jump to the start of a line, and the keys you need light up on the keyboard: the command keys in gold, the action key in green.</p>
+      <p>Each shortcut also shows the Windows combination next to the Mac one, so you can connect the reflex you already have to the keys you are learning.</p>
+      <p>Everything runs inside the page. There is no account, no setup, and no network request. Open it, learn a shortcut, and close it.</p>
+    </section>
+
+    <!-- Features -->
+    <section class="section">
+      <p class="section-label">Features</p>
+      <h2>What you get</h2>
+      <div class="features-grid">
+        <div class="feature">
+          <p class="feature-title">Visual keyboard</p>
+          <p>Every shortcut is shown on a full keyboard. The exact keys light up, so you see what to press instead of reading a list of symbols.</p>
+        </div>
+        <div class="feature">
+          <p class="feature-title">Learn and practice</p>
+          <p>Browse in Learn mode to see the keys and a short note. Switch to Practice and prove you remember them on the keyboard.</p>
+        </div>
+        <div class="feature">
+          <p class="feature-title">Windows to Mac</p>
+          <p>Each card shows the old Windows shortcut beside the Mac one, so the jump from Ctrl to Command is clear at a glance.</p>
+        </div>
+        <div class="feature">
+          <p class="feature-title">Practice with a streak</p>
+          <p>Practice names an action and you press the keys. A correct answer builds your streak, a wrong one lights the keys you chose in red.</p>
+        </div>
+        <div class="feature">
+          <p class="feature-title">Eight languages</p>
+          <p>The interface speaks English, Russian, Spanish, Portuguese, German, French, Chinese, and Japanese, picked from your browser.</p>
+        </div>
+        <div class="feature">
+          <p class="feature-title">Offline and private</p>
+          <p>Fonts and shortcut data are bundled in. Mac Click makes no network requests, asks for no permissions, and stores nothing.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- How it works -->
+    <section class="section" id="how-it-works">
+      <p class="section-label">How it works</p>
+      <h2>From a name to a key press</h2>
+
+      <p>Mac Click works in two modes. Learn shows you the answer. Practice checks that you remember it. Both run entirely in the page, with nothing loaded from the web.</p>
+
+      <div class="audio-chain">
+        <div class="chain-row"><span class="node">Pick an action</span> <span class="chain-comment">// copy, reopen tab, start of line</span></div>
+        <div class="chain-arrow">&#8595;</div>
+        <div class="chain-row"><span class="node">Keys light up</span> <span class="chain-comment">// command keys gold, action key green</span></div>
+        <div class="chain-arrow">&#8595;</div>
+        <div class="chain-row"><span class="node">Press them together</span> <span class="chain-comment">// the way you would on a real Mac</span></div>
+        <div class="chain-arrow">&#8595;</div>
+        <div class="chain-row"><span class="node">Practice mode</span> <span class="chain-comment">// it names an action, you answer</span></div>
+        <div class="chain-arrow">&#8595;</div>
+        <div class="chain-row"><span class="node">Streak grows</span> <span class="chain-comment">// right answers add up, wrong ones go red</span></div>
+      </div>
+
+      <div class="tech-detail">
+        <strong>Learn mode</strong><br />
+        Pick any action from the list or search for it. The keyboard highlights the keys it uses, and a short line explains what the shortcut does. The matching Windows combination sits right next to it.
+      </div>
+
+      <div class="tech-detail">
+        <strong>Practice mode</strong><br />
+        Mac Click names an action and you answer on the keyboard, by tapping the keys or pressing them on your own keyboard. A correct answer adds to your streak. A wrong one turns the keys you chose red, so you can see the miss and try again.
+      </div>
+    </section>
+
+    <!-- What you can learn -->
+    <section class="section">
+      <p class="section-label">Shortcuts</p>
+      <h2>What you can learn</h2>
+      <p>Mac Click covers the shortcuts you reach for every day, grouped so you can drill one area at a time.</p>
+
+      <div class="sites-list">
+        <span class="site-tag">Copy / Paste / Cut</span>
+        <span class="site-tag">Undo / Redo</span>
+        <span class="site-tag">Select all</span>
+        <span class="site-tag">Save</span>
+        <span class="site-tag">Find</span>
+        <span class="site-tag">Print</span>
+        <span class="site-tag">Switch apps</span>
+        <span class="site-tag">Spotlight</span>
+        <span class="site-tag">New tab / window</span>
+        <span class="site-tag">Close / Quit</span>
+        <span class="site-tag">Force quit</span>
+        <span class="site-tag">Screenshots</span>
+        <span class="site-tag">Delete a word</span>
+        <span class="site-tag">Start / end of line</span>
+        <span class="site-tag">Reopen closed tab</span>
+        <span class="site-tag">Address bar</span>
+        <span class="site-tag">Reload</span>
+        <span class="site-tag">Bookmark</span>
+        <span class="site-tag">Tabs</span>
+        <span class="site-tag">Downloads</span>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="section">
+      <p class="section-label">FAQ</p>
+      <h2>Common questions</h2>
+
+      <div class="faq-item">
+        <p class="faq-q">Is Mac Click free?</p>
+        <p class="faq-a">Yes. It is free, with no account and no in-app purchases.</p>
+      </div>
+
+      <div class="faq-item">
+        <p class="faq-q">Does it send my data anywhere?</p>
+        <p class="faq-a">No. Mac Click makes no network requests and asks for no permissions. Everything runs in its own page. Read the full <a href="/mac-click/privacy.html">privacy policy</a>.</p>
+      </div>
+
+      <div class="faq-item">
+        <p class="faq-q">Do I need a Mac to use it?</p>
+        <p class="faq-a">No. It runs in Chrome on any computer. It is built for people moving to a Mac, so you can learn the shortcuts on the machine you have now and arrive ready.</p>
+      </div>
+
+      <div class="faq-item">
+        <p class="faq-q">Which shortcuts does it cover?</p>
+        <p class="faq-a">The everyday ones: editing, windows and apps, screenshots, text movement, and browser shortcuts. Each comes with the Windows equivalent so the mapping is obvious.</p>
+      </div>
+
+      <div class="faq-item">
+        <p class="faq-q">Will the shortcuts fire while I practice?</p>
+        <p class="faq-a">In Practice mode you press the keys on Mac Click's own page, which catches them so the browser does not run them by accident. The risky ones that the browser or the system would grab first, like closing a tab, are shown in Learn mode rather than the practice pool.</p>
+      </div>
+
+      <div class="faq-item">
+        <p class="faq-q">Why an extension and not a website?</p>
+        <p class="faq-a">So the trainer sits one click away in your toolbar whenever you want a quick refresher, and so it runs fully offline with nothing loaded from the web.</p>
+      </div>
+    </section>
+
+    <!-- Privacy strip -->
+    <div class="privacy-strip">
+      <span class="privacy-icon">&#9632;</span>
+      <p>Runs in your browser. No permissions, no network, no data. <a href="/mac-click/privacy.html">Read the privacy policy</a></p>
+    </div>
+
+    <!-- Bottom CTA -->
+    <div class="cta-bottom">
+      <h2>Build the muscle memory before you switch</h2>
+      <p>Free. Works in your browser. Coming soon to the Chrome Web Store.</p>
+      <!-- When live, add here:
+      <a href="STORE_URL" target="_blank" rel="noopener noreferrer" class="btn-install">Install for free -&gt;</a> -->
+      <a href="/products.html" class="btn-ghost">See all products</a>
+    </div>
+  </div>
+
+  <footer>
+    <span class="footer-logo">LOBOV LABS &#169; 2026</span>
+    <ul class="footer-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="/products.html">Products</a></li>
+      <li><a href="/mac-click/privacy.html">Privacy</a></li>
+      <li><a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#108;&#111;&#98;&#111;&#118;&#108;&#97;&#98;&#115;&#64;&#112;&#114;&#111;&#116;&#111;&#110;&#46;&#109;&#101;">&#108;&#111;&#98;&#111;&#118;&#108;&#97;&#98;&#115;&#64;&#112;&#114;&#111;&#116;&#111;&#110;&#46;&#109;&#101;</a></li>
+    </ul>
+  </footer>
+
+</body>
+</html>
