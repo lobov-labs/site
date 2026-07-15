@@ -388,6 +388,7 @@
     .product-card:nth-child(3) { animation-delay: 0.25s; }
     .product-card:nth-child(4) { animation-delay: 0.35s; }
     .product-card:nth-child(5) { animation-delay: 0.45s; }
+    .product-card:nth-child(6) { animation-delay: 0.55s; }
 
     @media (max-width: 680px) {
       nav { padding: 0 1.25rem; }
@@ -421,6 +422,41 @@
   </header>
 
   <main class="products">
+
+    <!-- ── i18n Detective ── -->
+    <div class="product-card">
+      <div class="product-inner">
+        <div class="product-icon">iD</div>
+
+        <div class="product-content">
+          <div class="product-meta">
+            <span class="product-name">i18n Detective</span>
+            <span class="badge badge-wip">In review</span>
+            <span class="badge badge-chrome">Chrome Extension</span>
+          </div>
+          <p class="product-desc">
+            Debugging tool for translation bugs. Select a broken string on any page and see where it came from: a frontend dictionary with the key, or a backend API with the endpoint and field. Audits whole pages for raw keys and checks how well other languages are covered.
+          </p>
+          <ul class="product-features">
+            <li>Frontend or backend verdict</li>
+            <li>Page audit</li>
+            <li>Language coverage</li>
+            <li>Vue and React i18n</li>
+          </ul>
+        </div>
+
+        <div class="product-cta">
+          <a
+            href="https://github.com/mikelee9/i18n-detective"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="btn-install"
+          >GitHub →</a>
+          <a href="/i18n-detective/" class="btn-source">Learn more →</a>
+          <a href="/i18n-detective/privacy.html" class="btn-source">Privacy policy</a>
+        </div>
+      </div>
+    </div>
 
     <!-- ── Mac Click ── -->
     <div class="product-card">
