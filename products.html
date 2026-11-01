@@ -4,13 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Products - Lobov Labs</title>
-  <meta name="description" content="All the browser extensions and web tools shipped by Lobov Labs." />
+  <meta name="description" content="All the browser extensions, web tools and apps shipped by Lobov Labs." />
   <link rel="canonical" href="https://lobovlabs.com/products.html" />
 
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://lobovlabs.com/products.html" />
   <meta property="og:title" content="Products - Lobov Labs" />
-  <meta property="og:description" content="All the browser extensions and web tools shipped by Lobov Labs." />
+  <meta property="og:description" content="All the browser extensions, web tools and apps shipped by Lobov Labs." />
   <meta property="og:site_name" content="Lobov Labs" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -246,6 +246,12 @@
       background: #0a1520;
     }
 
+    .badge-android {
+      color: #7aabdf;
+      border-color: #1a3050;
+      background: #0a1520;
+    }
+
     .product-desc {
       font-size: 0.92rem;
       color: var(--text);
@@ -389,6 +395,8 @@
     .product-card:nth-child(4) { animation-delay: 0.35s; }
     .product-card:nth-child(5) { animation-delay: 0.45s; }
     .product-card:nth-child(6) { animation-delay: 0.55s; }
+    .product-card:nth-child(7) { animation-delay: 0.65s; }
+    .product-card:nth-child(8) { animation-delay: 0.75s; }
 
     @media (max-width: 680px) {
       nav { padding: 0 1.25rem; }
@@ -422,6 +430,41 @@
   </header>
 
   <main class="products">
+    <!-- ── Carrel ── -->
+    <div class="product-card">
+      <div class="product-inner">
+        <div class="product-icon">Ca</div>
+
+        <div class="product-content">
+          <div class="product-meta">
+            <span class="product-name">Carrel</span>
+            <span class="badge badge-live">Live</span>
+            <span class="badge badge-android">Android App</span>
+          </div>
+          <p class="product-desc">
+            Book tracker for Android. The books you've read, the one you're reading and the ones you want stand as spines on a wooden shelf, in the order you put them. Your profile shows the year month by month. Publish the shelf and anyone can open it in a browser without installing the app.
+          </p>
+          <ul class="product-features">
+            <li>Shelf of spines</li>
+            <li>Works offline</li>
+            <li>Shareable shelf page</li>
+            <li>No ads</li>
+          </ul>
+        </div>
+
+        <div class="product-cta">
+          <a
+            href="https://play.google.com/store/apps/details?id=app.trycarrel&amp;referrer=utm_source%3Dlobovlabs%26utm_campaign%3Dproducts"
+            target="_blank"
+            rel="noopener"
+            class="btn-install"
+          >Get it on Google Play →</a>
+          <a href="https://trycarrel.app" target="_blank" rel="noopener" class="btn-source">Learn more →</a>
+          <a href="https://trycarrel.app/privacy" target="_blank" rel="noopener" class="btn-source">Privacy policy</a>
+        </div>
+      </div>
+    </div>
+
     <!-- ── i18n Detective ── -->
     <div class="product-card">
       <div class="product-inner">
