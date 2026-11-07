@@ -295,7 +295,7 @@
       <span> / youtrack-to-sheets / privacy</span>
     </p>
     <h1>Privacy Policy</h1>
-    <p class="meta">YouTrack &#8594; Google Sheets &nbsp;&middot;&nbsp; Last updated: May 2026</p>
+    <p class="meta">YouTrack &#8594; Google Sheets &nbsp;&middot;&nbsp; Last updated: November 2026</p>
   </header>
 
   <main class="content">
@@ -303,7 +303,7 @@
     <div class="section">
       <h2>Overview</h2>
       <div class="highlight-box">
-        <p><strong>Short version:</strong> This extension does not collect, store, or transmit any personal data to external servers. All processing happens locally in your browser. Access to Google Drive is limited exclusively to the single file you choose.</p>
+        <p><strong>Short version:</strong> This extension does not collect personal data, and nothing it handles is sent to a Lobov Labs server. Processing happens in your browser, and data goes only to Google Sheets and to your own YouTrack. Google Drive access is limited to the spreadsheets you pick or that the extension creates for you.</p>
       </div>
     </div>
 
@@ -329,9 +329,10 @@
       <h2>Data storage</h2>
       <p>The extension stores only the following items locally in Chrome storage:</p>
       <ul>
-        <li>Your OAuth 2.0 token: used to authenticate with the Google Sheets API. Stored locally by Chrome, never sent to Lobov Labs servers.</li>
-        <li>The Spreadsheet ID you last used: for convenience, so you don&#8217;t have to re-enter it each time.</li>
+        <li>Your settings: export fields, language, sheet name and the &#8220;update done tasks&#8221; option.</li>
+        <li>The ID and name of the spreadsheet you last used, and the address of your YouTrack instance, so the status sync knows where to read from.</li>
       </ul>
+      <p>The extension does not store your OAuth token itself. Chrome issues and caches it through its built-in identity API (<code style="font-family: var(--mono); font-size: 0.82rem; color: var(--accent);">chrome.identity</code>) and renews it as needed.</p>
       <p>No data is sent to any server operated by Lobov Labs.</p>
     </div>
 
@@ -345,12 +346,17 @@
       </ul>
       <p>No Google user data is sent to Lobov Labs servers or any other external services.</p>
     </div>
+    <div class="section">
+      <h2>Choosing an existing spreadsheet</h2>
+      <p>When you choose &#8220;Select existing&#8221; in the settings, the extension opens a page on lobovlabs.com that shows Google&#8217;s own file picker (Google Picker). The picker needs an OAuth token to list your spreadsheets, so that page asks the extension for a short-lived token (valid for about an hour) while the window is open.</p>
+      <p>The token stays in that browser window. It is used only to call Google&#8217;s APIs, it is not put in the page address and not saved, and the page has no server-side component that could receive or log it. The only thing passed back to the extension is the ID and name of the spreadsheet you picked.</p>
+    </div>
 
     <div class="section">
       <h2>Data protection</h2>
       <p>All communication between the extension and Google APIs is conducted exclusively over HTTPS/TLS.</p>
-      <p>Authentication is handled via Google OAuth 2.0. The extension does not store your Google account credentials. The OAuth token is stored locally in Chrome&#8217;s secure storage (<code style="font-family: var(--mono); font-size: 0.82rem; color: var(--accent);">chrome.storage.local</code>) and is never transmitted to Lobov Labs servers.</p>
-      <p>Access is limited to the minimum necessary scopes: <code style="font-family: var(--mono); font-size: 0.82rem; color: var(--accent);">drive.file</code> and <code style="font-family: var(--mono); font-size: 0.82rem; color: var(--accent);">spreadsheets</code>, which restrict the extension to only the specific spreadsheet the user explicitly selects or creates.</p>
+      <p>Authentication is handled via Google OAuth 2.0. The extension never sees your Google password. The OAuth token is issued and cached by Chrome (<code style="font-family: var(--mono); font-size: 0.82rem; color: var(--accent);">chrome.identity</code>) and is never transmitted to Lobov Labs servers.</p>
+      <p>Access is limited to a single scope, <code style="font-family: var(--mono); font-size: 0.82rem; color: var(--accent);">drive.file</code>. It covers only the spreadsheets you pick in Google Picker and the ones the extension creates for you. No other file in your Google Drive can be read or changed.</p>
     </div>
 
     <div class="section">
@@ -368,10 +374,9 @@
       <h2>Google API scopes</h2>
       <p>The extension requests the following OAuth scopes:</p>
       <ul>
-        <li><code style="font-family: var(--mono); font-size: 0.82rem; color: var(--accent);">https://www.googleapis.com/auth/drive.file</code>: to create new spreadsheets in Google Drive on your behalf (used in automatic mode)</li>
-        <li><code style="font-family: var(--mono); font-size: 0.82rem; color: var(--accent);">https://www.googleapis.com/auth/spreadsheets</code>: to read and write data to the Google Spreadsheet you selected. Required to support writing to existing spreadsheets shared with you by others.</li>
+        <li><code style="font-family: var(--mono); font-size: 0.82rem; color: var(--accent);">https://www.googleapis.com/auth/drive.file</code>: to create a new spreadsheet on your behalf (automatic mode), and to read and write the existing spreadsheet you pick in Google Picker, including one shared with you by others.</li>
       </ul>
-      <p>These scopes grant access only to the specific spreadsheet you choose. No other files in your Google Drive are accessed or modified.</p>
+      <p>This scope grants access only to the spreadsheets you pick or that the extension creates. No other files in your Google Drive are accessed or modified.</p>
     </div>
 
     <div class="section">
@@ -379,6 +384,7 @@
       <p>The extension interacts only with:</p>
       <ul>
         <li><strong style="color: var(--bright);">Google Sheets API</strong>: to write exported data on your behalf</li>
+        <li><strong style="color: var(--bright);">Google Picker</strong>: Google&#8217;s file picker, shown on lobovlabs.com when you choose an existing spreadsheet</li>
         <li><strong style="color: var(--bright);">Your YouTrack instance</strong>: to read issue data from the page you have open and, during status sync, from its REST API</li>
       </ul>
       <p>No analytics, tracking scripts, or advertising SDKs are included.</p>
@@ -391,7 +397,7 @@
         <li><strong style="color: var(--bright);">activeTab</strong>: to read YouTrack issue data from the current tab when you click the extension</li>
         <li><strong style="color: var(--bright);">tabs</strong>: to detect when a YouTrack issue page is open, and to open and navigate a tab to the YouTrack issues list while syncing statuses</li>
         <li><strong style="color: var(--bright);">scripting</strong>: to inject the content script that reads issue data from YouTrack pages</li>
-        <li><strong style="color: var(--bright);">storage</strong>: to save your settings, OAuth token and last-used spreadsheet ID locally</li>
+        <li><strong style="color: var(--bright);">storage</strong>: to save your settings and the last-used spreadsheet ID locally</li>
         <li><strong style="color: var(--bright);">identity</strong>: to authenticate with Google OAuth 2.0</li>
         <li><strong style="color: var(--bright);">identity.email</strong>: to read the signed-in Chrome profile email, used only to populate the &#8220;Added by&#8221; field when exporting to a spreadsheet</li>
         <li><strong style="color: var(--bright);">Host access to YouTrack</strong>: for YouTrack Cloud and JetBrains-hosted instances it is granted by default; for self-hosted YouTrack (any domain) it is optional and requested at runtime, per site, only when you use the extension, solely to read issue data</li>

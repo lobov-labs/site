@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="robots" content="noindex" />
+  <meta name="referrer" content="no-referrer" />
+  <!-- Only this site and Google's Picker may run code here: the page holds a Google token. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' https://apis.google.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.gstatic.com https://*.googleusercontent.com https://*.google.com; frame-src https://docs.google.com https://drive.google.com https://accounts.google.com https://content.googleapis.com; connect-src https://www.googleapis.com https://content.googleapis.com; base-uri 'none'; form-action 'none'; object-src 'none'" />
   <title>Select spreadsheet</title>
   <style>
     *{margin:0;padding:0;box-sizing:border-box;}
@@ -23,127 +26,6 @@
   <button class="back-btn" id="backBtn"></button>
 </div>
 <script src="picker-config.js"></script>
-<script>
-  const params = new URLSearchParams(window.location.search);
-  const extId = params.get('ext');
-  const token = decodeURIComponent(window.location.hash.slice(1));
-  const lang = params.get('lang') === 'ru' ? 'ru' : 'en';
-
-  const T = {
-    ru: {
-      loading:    'Загрузка…',
-      loadPicker: 'Загрузка Google Picker…',
-      opening:    'Открываем выбор файла…',
-      checking:   'Проверяем доступ…',
-      readOnly:   'Таблица доступна только для чтения. Выберите ту, в которую можно писать.',
-      noParams:   'Отсутствуют параметры расширения.',
-      apiError:   'Не удалось загрузить Google API.',
-      backBtn:    '← Выбрать другой файл',
-    },
-    en: {
-      loading:    'Loading…',
-      loadPicker: 'Loading Google Picker…',
-      opening:    'Opening picker…',
-      checking:   'Checking access…',
-      readOnly:   'This spreadsheet is read-only. Please select one you can edit.',
-      noParams:   'Missing extension parameters.',
-      apiError:   'Failed to load Google API.',
-      backBtn:    '← Try another file',
-    }
-  };
-
-  function t(k) { return T[lang][k]; }
-
-  document.getElementById('msg').textContent = t('loading');
-  document.getElementById('backBtn').textContent = t('backBtn');
-
-  if (!extId || !token) {
-    showError(t('noParams'));
-  } else {
-    loadPicker();
-  }
-
-  function loadPicker() {
-    document.getElementById('msg').textContent = t('loadPicker');
-    const script = document.createElement('script');
-    script.src = 'https://apis.google.com/js/api.js';
-    script.onload = () => gapi.load('picker', createPicker);
-    script.onerror = () => showError(t('apiError'));
-    document.head.appendChild(script);
-  }
-
-  let picker;
-
-  function createPicker() {
-    document.getElementById('msg').textContent = t('opening');
-
-    const view = new google.picker.DocsView(google.picker.ViewId.SPREADSHEETS)
-      .setIncludeFolders(false)
-      .setSelectFolderEnabled(false);
-
-    picker = new google.picker.PickerBuilder()
-      .addView(view)
-      .setOAuthToken(token)
-      .setDeveloperKey(window.PICKER_API_KEY)
-      .setCallback(pickerCallback)
-      .build();
-
-    picker.setVisible(true);
-
-    document.getElementById('backBtn').addEventListener('click', () => {
-      document.getElementById('backBtn').style.display = 'none';
-      document.getElementById('spinner').style.display = '';
-      document.getElementById('msg').className = '';
-      document.getElementById('msg').textContent = t('opening');
-      document.getElementById('state').style.display = 'none';
-      picker.setVisible(true);
-    });
-
-    setTimeout(() => {
-      document.getElementById('state').style.display = 'none';
-    }, 600);
-  }
-
-  async function pickerCallback(data) {
-    if (data.action === google.picker.Action.PICKED) {
-      const doc = data.docs[0];
-      document.getElementById('state').style.display = 'flex';
-      document.getElementById('spinner').style.display = '';
-      document.getElementById('backBtn').style.display = 'none';
-      document.getElementById('msg').className = '';
-      document.getElementById('msg').textContent = t('checking');
-      try {
-        const resp = await fetch(
-          `https://www.googleapis.com/drive/v3/files/${doc.id}?fields=capabilities.canEdit`,
-          { headers: { Authorization: 'Bearer ' + token } }
-        );
-        if (resp.ok) {
-          const json = await resp.json();
-          if (json.capabilities?.canEdit === false) {
-            showError(t('readOnly'));
-            return;
-          }
-        }
-      } catch {
-        // proceed, let Sheets API handle access errors
-      }
-      chrome.runtime.sendMessage(extId, {
-        type: 'PICKER_SELECTED',
-        fileId: doc.id,
-        fileName: doc.name
-      }, () => window.close());
-    } else if (data.action === google.picker.Action.CANCEL) {
-      chrome.runtime.sendMessage(extId, { type: 'PICKER_CANCEL' }, () => window.close());
-    }
-  }
-
-  function showError(msg) {
-    document.getElementById('spinner').style.display = 'none';
-    const el = document.getElementById('msg');
-    el.className = 'error';
-    el.textContent = msg;
-    document.getElementById('backBtn').style.display = 'inline-block';
-  }
-</script>
+<script src="picker.js"></script>
 </body>
 </html>

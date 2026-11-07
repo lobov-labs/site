@@ -302,7 +302,7 @@
       <span> / i18n-detective / privacy</span>
     </p>
     <h1>Privacy Policy</h1>
-    <p class="meta">i18n Detective &nbsp;&middot;&nbsp; Last updated: July 2026</p>
+    <p class="meta">i18n Detective &nbsp;&middot;&nbsp; Last updated: November 2026</p>
   </header>
 
   <main class="content">
@@ -332,12 +332,12 @@
 
     <div class="section">
       <h2>Where captured data lives</h2>
-      <p>Captured dictionaries and API responses are held in the tab's memory and in the tab's <code>sessionStorage</code>, so they survive a page reload while you are debugging. They never leave the tab: closing it discards everything, and the popup has a <em>Clear captured data</em> button that wipes the tab's data on demand.</p>
+      <p>Captured API responses are held only in the tab's memory. Captured dictionaries are also copied to the extension's own session storage (<code>chrome.storage.session</code>), kept per tab, so they survive a page reload while you are debugging. That storage lives in memory, is never written to disk, and is not visible to the site. Nothing leaves your browser: closing the tab removes its data, closing the browser removes all of it, and the popup has a <em>Clear captured data</em> button that wipes the tab's data on demand.</p>
     </div>
 
     <div class="section">
       <h2>Network requests the extension makes</h2>
-      <p>Almost all of the time, i18n Detective only listens. It makes requests of its own in one case: when you click <em>Check language coverage</em>, it downloads the same dictionary files the site already uses, with a different locale substituted in the URL, to see which languages are missing keys. These requests go to the site you are inspecting, are sent without cookies or credentials, and happen only when you press the button.</p>
+      <p>Almost all of the time, i18n Detective only listens. It makes requests of its own in one case: when you click <em>Check language coverage</em>, it downloads the same dictionary files the site already uses, with a different locale substituted in the URL, to see which languages are missing keys. These requests go to the same servers the page loaded its dictionaries from (the site itself or its CDN), are sent without cookies or credentials, and happen only when you press the button. Addresses on your local network are never requested unless the page you are inspecting is itself on such an address, for example a site on localhost during development.</p>
       <p>Nothing is ever requested from our infrastructure, because there is none.</p>
     </div>
 
@@ -353,7 +353,7 @@
         <li><code>storage</code> keeps your settings</li>
         <li>Host access to the sites you open lets it observe dictionaries and show its panels on whatever site you happen to be debugging, since staging and production domains cannot be known in advance</li>
       </ul>
-      <p>If broad access bothers you, switch the extension to whitelist mode in the popup. It will then stay dormant everywhere except the sites you listed, and on inactive sites it skips response capture entirely.</p>
+      <p>If broad access bothers you, switch the extension to whitelist mode in the popup. It will then stay dormant everywhere except the sites you listed. On inactive sites it does not keep or analyze responses: in the first moments of a page load, before its settings have been read, it may hold a few responses in memory, and it drops them unread as soon as it learns the site is inactive.</p>
     </div>
 
     <div class="section">
