@@ -551,9 +551,9 @@
     <section class="section">
       <p class="section-label">What it does</p>
       <h2>From YouTrack issue to spreadsheet row</h2>
-      <p>Tracking issues in YouTrack is one thing. Reporting on them in a spreadsheet is another, and that usually means exporting CSV files, fixing columns, or wiring up the YouTrack REST API by hand. This extension removes that step. Open an issue or an issues list in YouTrack, click the extension, and the rows land in your Google Sheet.</p>
+      <p>Tracking issues in YouTrack is one thing. Reporting on them in a spreadsheet is another, and that usually means exporting CSV files, fixing columns, or wiring up the YouTrack REST API by hand. This extension removes that step. Open an issue in YouTrack, click the extension, and the row lands in your Google Sheet.</p>
       <p>Each export captures the issue ID, title, status, priority, author, assignee, and the creation and update dates. The extension also writes an &#8220;Added by&#8221; column with the Google account that ran the export, so a team sharing one sheet can see who pulled each issue.</p>
-      <p>The whole thing runs in your browser. Issue data goes from the YouTrack page to the Google Sheets API and nowhere else. There is no Lobov Labs server in the middle, no account to create, and no data stored outside your browser apart from the OAuth token and the last spreadsheet ID.</p>
+      <p>The whole thing runs in your browser. Issue data goes from the YouTrack page to the Google Sheets API and nowhere else. There is no Lobov Labs server in the middle, no account to create, and nothing stored anywhere but Chrome itself: your settings and the last spreadsheet ID sit in Chrome&#8217;s extension storage, and the OAuth token is kept by Chrome.</p>
     </section>
 
     <!-- Features -->
@@ -563,11 +563,11 @@
       <div class="features-grid">
         <div class="feature">
           <p class="feature-title">One-click export</p>
-          <p>Click the extension on any YouTrack issue or issues list and the rows append to your chosen spreadsheet within a second or two.</p>
+          <p>Click the extension on any YouTrack issue and it is appended as a new row to your chosen spreadsheet within a second or two.</p>
         </div>
         <div class="feature">
-          <p class="feature-title">Eight fields per issue</p>
-          <p>ID, title, status, priority, author, assignee, created date, and updated date land in separate columns, ready to sort and filter.</p>
+          <p class="feature-title">Ten fields per issue</p>
+          <p>ID, title, link, status, priority, author, assignee, created date, date added, and who added it land in separate columns, ready to sort and filter. Turn off the ones you don&#8217;t need in the settings.</p>
         </div>
         <div class="feature">
           <p class="feature-title">Status sync</p>
@@ -579,7 +579,7 @@
         </div>
         <div class="feature">
           <p class="feature-title">Google OAuth 2.0</p>
-          <p>Sign in with your Google account. The extension uses the <code>drive.file</code> and <code>spreadsheets</code> scopes, so it touches only the sheet you select.</p>
+          <p>Sign in with your Google account. The extension uses only the <code>drive.file</code> scope, so it touches only the sheets you pick or that it creates for you.</p>
         </div>
         <div class="feature">
           <p class="feature-title">Custom project keys</p>
@@ -596,11 +596,11 @@
       <p>The extension injects a content script into your open YouTrack tab. That script reads the issue fields rendered on the page, hands them to the extension, and the extension writes them into your spreadsheet through the Google Sheets API. Everything below happens inside Chrome.</p>
 
       <div class="audio-chain">
-        <div class="chain-row"><span class="node">YouTrack page</span> <span class="chain-comment">// issue or issues list</span></div>
+        <div class="chain-row"><span class="node">YouTrack page</span> <span class="chain-comment">// issue page</span></div>
         <div class="chain-arrow">&#8595;</div>
         <div class="chain-row"><span class="node">Content script</span> <span class="chain-comment">// reads ID, title, status, priority, author, assignee, dates</span></div>
         <div class="chain-arrow">&#8595;</div>
-        <div class="chain-row"><span class="node">Google OAuth 2.0</span> <span class="chain-comment">// chrome.identity, token cached locally</span></div>
+        <div class="chain-row"><span class="node">Google OAuth 2.0</span> <span class="chain-comment">// chrome.identity, token kept by Chrome</span></div>
         <div class="chain-arrow">&#8595;</div>
         <div class="chain-row"><span class="node">Google Sheets API</span> <span class="chain-comment">// appends rows to your selected sheet</span></div>
         <div class="chain-arrow">&#8595;</div>
@@ -614,7 +614,7 @@
 
       <div class="tech-detail">
         <strong>Authorizing Google</strong><br />
-        Sign-in goes through Google OAuth 2.0 via <code>chrome.identity</code>. The extension requests <code>drive.file</code> to create a new spreadsheet when you want one, and <code>spreadsheets</code> to write into a sheet that already exists or was shared with you. The token lives in <code>chrome.storage.local</code> and never reaches a Lobov Labs server.
+        Sign-in goes through Google OAuth 2.0 via <code>chrome.identity</code>. The extension requests a single scope, <code>drive.file</code>: it lets the extension create a new spreadsheet when you want one, and read and write a sheet you pick in Google Picker, including one shared with you. Chrome issues and caches the token itself, and it never reaches a Lobov Labs server.
       </div>
 
       <div class="tech-detail">
@@ -622,7 +622,7 @@
         Issue data is appended to the spreadsheet you selected. The last-used spreadsheet ID is saved locally so you do not re-enter it every time. The &#8220;Added by&#8221; column records the Google email that ran the export and is written only to that sheet.
       </div>
 
-      <p>You can revoke the extension&#8217;s Google access at any time at <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener">myaccount.google.com/permissions</a>, and uninstalling removes the locally stored token and spreadsheet ID.</p>
+      <p>You can revoke the extension&#8217;s Google access at any time at <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener">myaccount.google.com/permissions</a>, and uninstalling the extension removes its saved settings and spreadsheet ID.</p>
     </section>
 
     <!-- Status sync -->
@@ -670,12 +670,12 @@
 
       <div class="faq-item">
         <p class="faq-q">Can it write to an existing spreadsheet?</p>
-        <p class="faq-a">Yes. It can append to a sheet you already have, including one shared with you by a teammate, or create a new spreadsheet for you. The <code>spreadsheets</code> and <code>drive.file</code> scopes limit access to the file you pick.</p>
+        <p class="faq-a">Yes. It can append to a sheet you already have, including one shared with you by a teammate, or create a new spreadsheet for you. The <code>drive.file</code> scope limits access to the files you pick or that the extension creates.</p>
       </div>
 
       <div class="faq-item">
         <p class="faq-q">Is my data sent to your servers?</p>
-        <p class="faq-a">No. Issue data travels from the YouTrack page to the Google Sheets API and nowhere else. Lobov Labs operates no server in this flow. The only things stored locally are your OAuth token and the last spreadsheet ID. Read the full <a href="/youtrack-to-sheets/privacy.html">privacy policy</a>.</p>
+        <p class="faq-a">No. Issue data travels from the YouTrack page to the Google Sheets API and nowhere else. Lobov Labs operates no server in this flow. The only things stored are your settings and the last spreadsheet ID in Chrome&#8217;s extension storage, plus the OAuth token, which Chrome keeps itself. Read the full <a href="/youtrack-to-sheets/privacy.html">privacy policy</a>.</p>
       </div>
 
       <div class="faq-item">

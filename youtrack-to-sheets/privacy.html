@@ -322,16 +322,19 @@
         <li>Your Google account identity: only to authorise writes to Google Sheets on your behalf</li>
         <li>Your Google account email address: used solely to populate the &#8220;Added by&#8221; field in the spreadsheet row, so team members can see who exported each issue. The email is written only to the spreadsheet you selected and is not transmitted to any other service.</li>
         <li>The Google Spreadsheet you explicitly select as the export destination</li>
+        <li>When you run the &#8220;Update statuses&#8221; sync, the contents of that spreadsheet needed for it: the issue IDs and statuses already in the sheet. They are read only to work out which rows need a new status, and are sent nowhere except back to that spreadsheet and, as issue IDs in request addresses, to your YouTrack instance</li>
       </ul>
     </div>
 
     <div class="section">
       <h2>Data storage</h2>
-      <p>The extension stores only the following items locally in Chrome storage:</p>
+      <p>The extension stores only the following items in Chrome&#8217;s extension storage (<code style="font-family: var(--mono); font-size: 0.82rem; color: var(--accent);">chrome.storage.sync</code>). If you are signed in to Chrome with sync turned on, Chrome may sync them across your devices through your Google account. That sync is handled by Chrome itself; Lobov Labs has no access to it.</p>
       <ul>
         <li>Your settings: export fields, language, sheet name and the &#8220;update done tasks&#8221; option.</li>
         <li>The ID and name of the spreadsheet you last used, and the address of your YouTrack instance, so the status sync knows where to read from.</li>
+        <li>A summary of the last status sync: how many rows were updated, unchanged or not found, and when.</li>
       </ul>
+      <p>While a status sync is running, the list of status changes waiting for your confirmation is kept on this device only (<code style="font-family: var(--mono); font-size: 0.82rem; color: var(--accent);">chrome.storage.local</code>) and is removed once you apply or cancel it.</p>
       <p>The extension does not store your OAuth token itself. Chrome issues and caches it through its built-in identity API (<code style="font-family: var(--mono); font-size: 0.82rem; color: var(--accent);">chrome.identity</code>) and renews it as needed.</p>
       <p>No data is sent to any server operated by Lobov Labs.</p>
     </div>
@@ -365,9 +368,9 @@
       <p>Data stored locally in your browser:</p>
       <ul>
         <li><strong style="color: var(--bright);">OAuth token</strong>: stored by Chrome and automatically managed by the browser. You can revoke access at any time at <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener">myaccount.google.com/permissions</a>.</li>
-        <li><strong style="color: var(--bright);">Last-used Spreadsheet ID</strong>: stored locally for convenience. You can clear it by uninstalling the extension or clearing Chrome extension storage.</li>
+        <li><strong style="color: var(--bright);">Settings, last-used spreadsheet ID and YouTrack address</strong>: stored in Chrome extension storage for convenience. They are removed when you uninstall the extension.</li>
       </ul>
-      <p>To fully remove all locally stored data, uninstall the extension from Chrome.</p>
+      <p>To remove all data the extension has stored, uninstall it from Chrome.</p>
     </div>
 
     <div class="section">
@@ -394,10 +397,9 @@
       <h2>Permissions</h2>
       <p>The extension requests the following Chrome permissions:</p>
       <ul>
-        <li><strong style="color: var(--bright);">activeTab</strong>: to read YouTrack issue data from the current tab when you click the extension</li>
-        <li><strong style="color: var(--bright);">tabs</strong>: to detect when a YouTrack issue page is open, and to open and navigate a tab to the YouTrack issues list while syncing statuses</li>
+        <li><strong style="color: var(--bright);">activeTab</strong>: to read the address and YouTrack issue data of the current tab when you click the extension</li>
         <li><strong style="color: var(--bright);">scripting</strong>: to inject the content script that reads issue data from YouTrack pages</li>
-        <li><strong style="color: var(--bright);">storage</strong>: to save your settings and the last-used spreadsheet ID locally</li>
+        <li><strong style="color: var(--bright);">storage</strong>: to save your settings and the last-used spreadsheet ID in Chrome extension storage</li>
         <li><strong style="color: var(--bright);">identity</strong>: to authenticate with Google OAuth 2.0</li>
         <li><strong style="color: var(--bright);">identity.email</strong>: to read the signed-in Chrome profile email, used only to populate the &#8220;Added by&#8221; field when exporting to a spreadsheet</li>
         <li><strong style="color: var(--bright);">Host access to YouTrack</strong>: for YouTrack Cloud and JetBrains-hosted instances it is granted by default; for self-hosted YouTrack (any domain) it is optional and requested at runtime, per site, only when you use the extension, solely to read issue data</li>
